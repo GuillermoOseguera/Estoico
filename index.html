@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superhéroes Estoicos: Aventura Interactiva</title>
+    <!-- 1. Cargar Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Cargar la fuente Inter --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* 3. Definir la fuente para todo el cuerpo */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f9ff; /* bg-blue-50 */
+            color: #1f2937; /* text-gray-800 */
+        }
+        
+        /* 4. Estilos para el juego de Arrastrar y Soltar (Drag and Drop) */
+        
+        /* Estilo para el objeto que estás arrastrando */
+        .dragging {
+            opacity: 0.5;
+            transform: scale(1.05);
+            background-color: #fef08a; /* bg-yellow-200 */
+            cursor: grabbing;
+        }
+
+        /* Estilo para el objeto que puedes arrastrar */
+        .draggable {
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+        
+        /* Estilo para la zona donde puedes soltar, cuando pasas por encima */
+        .drag-over {
+            border-style: dashed;
+            border-color: #0ea5e9; /* border-sky-500 */
+            background-color: #f0f9ff; /* bg-blue-50 */
+        }
+
+        /* 5. Estilos para el Acordeón */
+        .accordion-button {
+            transition: background-color 0.2s ease;
+        }
+
+        /* Estilo para el botón cuando el acordeón está activo/abierto */
+        .accordion-button.active {
+            background-color: #bfdbfe; /* bg-blue-200 */
+            color: #1d4ed8; /* text-blue-700 */
+        }
+
+        /* Pequeña animación para el contenido del acordeón */
+        .accordion-content {
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+            overflow: hidden;
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        
+        .accordion-content:not(.hidden) {
+            max-height: 500px; /* Altura suficiente para el contenido */
+            padding-top: 1rem; /* p-4 */
+            padding-bottom: 1rem; /* p-4 */
+        }
+
+        /* 6. Estilos para la comprobación del juego */
+        .item-correct {
+            border: 3px solid #22c55e !important; /* border-green-500 */
+            background-color: #f0fdf4 !important; /* bg-green-50 */
+        }
+        .item-incorrect {
+            border: 3px solid #ef4444 !important; /* border-red-500 */
+            background-color: #fef2f2 !important; /* bg-red-50 */
+        }
+        /* Estilo para las imágenes de virtud */
+        .virtue-icon {
+            width: 288px; /* 6 veces el tamaño original de 48px, o el doble de 144px */
+            height: 288px; /* Mantener la proporción para que sea cuadrada */
+            margin: 0 auto; /* Centrar la imagen */
+            object-fit: contain; /* Asegura que la imagen completa se vea dentro de su espacio */
+        }
+        /* Hacer la sección de botones cuadrada y que las imágenes se adapten */
+        #virtue-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            padding-bottom: 100%; /* Truco para hacer el contenedor cuadrado */
+            position: relative; /* Necesario para el truco de padding-bottom */
+            height: 0; /* Necesario para el truco de padding-bottom */
+            align-items: stretch; /* Estirar los items para que ocupen todo el espacio */
+        }
+        #virtue-buttons .virtue-button {
+            position: absolute; /* Posicionamiento absoluto dentro del contenedor cuadrado */
+            width: calc(50% - 0.5rem); /* Ancho para dos columnas con gap */
+            height: calc(50% - 0.5rem); /* Altura para dos filas con gap */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0; /* Quitar padding interno para maximizar imagen */
+            transition: all 0.2s ease;
+        }
+        #virtue-buttons .virtue-button:nth-child(1) { top: 0; left: 0; }
+        #virtue-buttons .virtue-button:nth-child(2) { top: 0; right: 0; }
+        #virtue-buttons .virtue-button:nth-child(3) { bottom: 0; left: 0; }
+        #virtue-buttons .virtue-button:nth-child(4) { bottom: 0; right: 0; }
+        /* Ajustes para el logo en el header */
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centrar el contenido principal del header */
+            position: relative; /* Para posicionar el logo absolutamente */
+            max-width: 900px; /* Ancho máximo para el contenido del header */
+            margin: 0 auto;
+        }
+        .header-logo {
+            position: absolute;
+            left: -100px; /* Ajusta este valor para mover más a la izquierda, puedes experimentar */
+            height: 180px; /* Logo 3 veces más grande (original 60px * 3 = 180px) */
+            width: auto; /* Mantener la proporción */
+            top: 50%; /* Centrar verticalmente */
+            transform: translateY(-50%); /* Ajuste fino para centrar */
+        }
+        /* Ajustar el padding izquierdo del contenedor de texto para evitar solapamiento */
+        .header-text-container {
+            padding-left: 100px; /* Ajusta esto según el tamaño del logo y su posición */
+        }
+        /* Reducir el tamaño de las letras del encabezado */
+        .header-content h1 {
+            font-size: 3rem; /* Equivalente a text-4xl de Tailwind, ajustado */
+        }
+        .header-content p {
+            font-size: 1.25rem; /* Equivalente a text-xl de Tailwind, ajustado */
+        }
+
+        /* Estilos para el Modal de Recompensa */
+        .modal {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 90%;
+            width: 500px;
+            position: relative;
+        }
+        .modal-close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280; /* text-gray-500 */
+        }
+         #reward-video {
+            width: 100%;
+            max-height: 70vh; /* Limitar altura del video */
+            border-radius: 0.5rem;
+        }
+
+
+        @media (max-width: 768px) {
+            .header-logo {
+                height: 80px; /* Más grande que antes en móviles (original 40px * 2 = 80px) */
+                left: 1rem; /* Margen en móviles */
+                position: relative; /* Cambiar a relativo para flujo normal en móviles */
+                transform: none; /* Quitar transformación vertical en móviles */
+                margin-bottom: 1rem; /* Añadir espacio debajo del logo */
+            }
+            .header-content {
+                flex-direction: column; /* Apilar en móviles */
+                text-align: center;
+                padding-left: 0; /* Quitar padding izquierdo en móviles */
+            }
+            .header-text-container {
+                padding-left: 0; /* Quitar padding izquierdo en móviles */
+            }
+            .header-content h1 {
+                font-size: 2.5rem; /* Ajustar para móviles */
+            }
+            .header-content p {
+                font-size: 1rem; /* Ajustar para móviles */
+            }
+            /* Ajustes para móviles en la sección de virtudes */
+            #virtue-buttons {
+                padding-bottom: 0; /* Desactivar truco cuadrado en móviles para mejor flujo */
+                height: auto; /* Permitir altura automática */
+                position: relative; /* Mantener relativo para posicionamiento de hijos */
+                grid-template-columns: 1fr; /* Una columna en móviles */
+                gap: 1rem;
+            }
+            #virtue-buttons .virtue-button {
+                position: relative; /* Restaurar posicionamiento relativo */
+                width: 100%; /* Ocupar todo el ancho */
+                height: auto; /* Altura automática */
+                top: auto; left: auto; right: auto; bottom: auto; /* Eliminar posiciones fijas */
+                padding: 1rem; /* Restaurar padding para un mejor toque en móviles */
+            }
+            .virtue-icon {
+                width: 96px; /* Ajuste para móviles, 2 veces el original */
+                height: 96px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-blue-50">
+
+    <!-- Encabezado Heroico --><header class="bg-gradient-to-r from-blue-600 to-cyan-500 text-white p-8 md:p-12 text-center shadow-lg rounded-b-3xl relative overflow-hidden">
+        <div class="header-content">
+            <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/logo.png?raw=true" alt="Logo Estoico" class="header-logo">
+            <div class="header-text-container">
+                <h1 class="font-black mb-4">¡Conviértete en un Superhéroe de la Mente! 🦸‍♂️🧠</h1>
+                <p class="font-light max-w-3xl mx-auto">Elias: Descubre los secretos de los Estoicos: sabios antiguos que eran como superhéroes de la vida real.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal --><main class="max-w-6xl mx-auto p-4 md:p-8 space-y-12 md:space-y-16">
+
+        <!-- Sección 1: ¿Quiénes eran los Estoicos? --><section class="bg-white rounded-2xl shadow-lg p-6 md:p-8 transform transition hover:scale-[1.02] duration-300">
+            <h2 class="text-3xl font-bold text-blue-700 mb-4">Los Sabios Antiguos 🏛️</h2>
+            <p class="text-lg leading-relaxed">
+                "Hace muchísimo tiempo, en la antigua Grecia, había un grupo de personas muy inteligentes que se hacían preguntas importantes: ¿Cómo puedo ser feliz? ¿Cómo puedo ser valiente cuando tengo miedo? ¿Qué puedo hacer cuando algo malo me pasa?
+            </p>
+            <p class="text-lg leading-relaxed mt-4">
+                Estos pensadores se llamaban <strong>Estoicos</strong>, y descubrieron secretos increíbles sobre cómo vivir bien. ¡Y lo mejor es que estos secretos funcionan igual de bien hoy que hace miles de años!"
+            </p>
+        </section>
+
+        <!-- Sección 2: Juego Interactivo "Las Dos Cajas" --><section class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-2">Tu Primer Superpoder: La Regla de las Dos Cajas ⚡</h2>
+            <p class="text-lg text-center mb-6">¡Vamos a jugar! Arrastra cada situación a la caja correcta.</p>
+            <p class="text-center mb-6 font-semibold">La regla de oro: ¡Solo enfócate en lo que está en la caja verde! Lo de la caja roja, déjalo ir.</p>
+            <p id="streak-counter" class="text-center text-lg font-bold text-purple-700 mb-4">Racha de aciertos perfectos: 0</p>
+            
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Columna de Preocupaciones --><div class="w-full md:w-1/3">
+                    <h3 class="text-xl font-bold text-center mb-4 p-3 bg-gray-200 rounded-lg">Arrastra estas 7 situaciones 👇</h3>
+                    <div id="worries-list" class="space-y-3 p-4 bg-gray-50 rounded-lg min-h-[450px]">
+                        <!-- Los 7 elementos aleatorios se insertarán aquí --></div>
+                    <!-- Botones de Acción --><div class="mt-4 space-y-3">
+                        <button id="check-button" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-green-700 transition duration-200">
+                            ¡Comprobar Respuestas!
+                        </button>
+                        <button id="reset-button" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-blue-700 transition duration-200">
+                            ¡Reiniciar Juego!
+                        </button>
+                        <!-- Área de Resultados --><div id="results-area" class="hidden text-center text-xl font-bold p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
+                            <!-- El resultado se insertará aquí --></div>
+                    </div>
+                </div>
+
+                <!-- Columna de Cajas (Zonas de Soltar) --><div class="w-full md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Caja Verde --><div class="bg-green-100 rounded-lg border-4 border-green-500 shadow-inner">
+                        <h3 class="text-xl font-bold text-center p-4 bg-green-500 text-white rounded-t-md">✅ PUEDO CONTROLARLO ✅</h3>
+                        <div id="box-green" class="drop-zone min-h-[300px] p-4 space-y-3">
+                            <!-- Aquí caen las cosas --></div>
+                    </div>
+                    <!-- Caja Roja --><div class="bg-red-100 rounded-lg border-4 border-red-500 shadow-inner">
+                        <h3 class="text-xl font-bold text-center p-4 bg-red-500 text-white rounded-t-md">❌ NO PUEDO CONTROLARLO ❌</h3>
+                        <div id="box-red" class="drop-zone min-h-[300px] p-4 space-y-3">
+                            <!-- Aquí caen las cosas --></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- (¡NUEVA SECCIÓN!) Sección 3: El Desafío de las 4 Virtudes --><section class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-6">Sección 3: El Desafío de las 4 Virtudes ⚔️</h2>
+            <p class="text-lg text-center mb-8">¡Hora del desafío, Elías! Te enfrentarás a situaciones reales. Elige el "superpoder" (la virtud) que mejor te ayudaría a manejarla.</p>
+            
+            <div id="virtue-quiz" class="max-w-3xl mx-auto bg-gray-50 p-6 rounded-lg shadow-inner">
+                <!-- Escenario --><div class="mb-6 min-h-[100px]">
+                    <p id="scenario-text" class="text-xl text-center font-medium text-gray-800">Cargando desafío...</p>
+                </div>
+
+                <!-- Botones de Virtud --><div id="virtue-buttons" class="gap-4 mb-6">
+                    <button data-virtue="sabiduria" class="virtue-button bg-yellow-400 hover:bg-yellow-500 text-yellow-900 p-4 rounded-lg shadow transition duration-200 transform hover:scale-105">
+                        <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/Sabiduria.png?raw=true" alt="Búho de Sabiduría" class="virtue-icon">
+                        <!-- <span class="block text-xl font-bold">Sabiduría</span> --></button>
+                    <button data-virtue="coraje" class="virtue-button bg-red-400 hover:bg-red-500 text-red-900 p-4 rounded-lg shadow transition duration-200 transform hover:scale-105">
+                        <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/Coraje.png?raw=true" alt="León de Coraje" class="virtue-icon">
+                        <!-- <span class="block text-xl font-bold">Coraje</span> --></button>
+                    <button data-virtue="justicia" class="virtue-button bg-blue-400 hover:bg-blue-500 text-blue-900 p-4 rounded-lg shadow transition duration-200 transform hover:scale-105">
+                        <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/Justicia.png?raw=true" alt="Balanza de Justicia" class="virtue-icon">
+                        <!-- <span class="block text-xl font-bold">Justicia</span> --></button>
+                    <button data-virtue="templanza" class="virtue-button bg-green-400 hover:bg-green-500 text-green-900 p-4 rounded-lg shadow transition duration-200 transform hover:scale-105">
+                        <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/Templanza.png?raw=true" alt="Persona Meditando de Templanza" class="virtue-icon">
+                        <!-- <span class="block text-xl font-bold">Templanza</span> --></button>
+                </div>
+
+                <!-- Feedback --><div id="virtue-feedback" class="min-h-[100px] p-4 rounded-lg text-center text-lg font-medium hidden">
+                    <!-- El feedback irá aquí --></div>
+
+                <!-- Botón de Siguiente --><button id="next-challenge-button" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg shadow hover:bg-indigo-700 transition duration-200 hidden mt-4">
+                    Siguiente Desafío
+                </button>
+            </div>
+        </section>
+
+        <!-- Sección 4: Historias de Héroes Legendarios (Antes S3) --><section>
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-4">Sección 4: Historias de Héroes Legendarios ✨</h2>
+            
+            <!-- Selector de Historias --><div class="max-w-md mx-auto mb-8">
+                <label for="story-selector" class="block text-lg font-medium text-center text-gray-700 mb-2">Elige una historia para leer:</label>
+                <select id="story-selector" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <!-- Las opciones se cargarán con JavaScript --></select>
+            </div>
+
+            <!-- Contenedor de la Historia (Imagen + Texto) --><div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 flex flex-col md:flex-row gap-8 items-center">
+                <!-- Columna de la Imagen (ESTÁTICA) --><div class="w-full md:w-1/2 flex-shrink-0">
+                    <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/cuentos.png?raw=true" alt="Ilustración de cuentos y aventuras" class="w-full h-auto rounded-lg shadow-md object-cover">
+                </div>
+                <!-- Columna del Texto (DINÁMICA) --><div id="story-content-wrapper" class="w-full md:w-1/2 flex flex-col min-h-[300px]">
+                    <!-- El contenido de la historia (título, párrafos, lección) se cargará aquí --></div>
+            </div>
+        </section>
+
+        <!-- Sección 5: Entrenamiento (Antes S4) --><section class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-6">Sección 5: ¡Comienza tu Entrenamiento de Héroe! 🎯</h2>
+            <p class="text-lg text-center mb-6">¡Elias, llegó la hora de tu entrenamiento! Un superhéroe de la mente practica todos los días. ¡Haz clic en estas misiones para ver tus desafíos!</p>
+            <div id="accordion" class="space-y-4">
+                <!-- Misión 1: Diario --><div>
+                    <button class="accordion-button w-full text-left text-xl font-bold p-5 bg-blue-100 rounded-lg shadow hover:bg-blue-200 focus:outline-none flex justify-between items-center">
+                        <span>Misión 1: El Diario del Héroe (5 min) 📓</span>
+                        <span class="arrow text-2xl font-bold">+</span>
+                    </button>
+                    <div class="accordion-content hidden bg-gray-50 p-4 rounded-b-lg border border-t-0 border-gray-200">
+                        <p>Cada noche, responde estas tres preguntas en un cuaderno:</p>
+                        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                            <li>¿Qué hice bien hoy? (¡Celebra tus victorias!)</li>
+                            <li>¿Qué podría hacer mejor mañana? (¡Siempre aprendiendo!)</li>
+                            <li>¿Por qué cosa estoy agradecido? (¡Encuentra lo bueno!)</li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- Misión 2: Juego Y Qué Si --><div>
+                    <button class="accordion-button w-full text-left text-xl font-bold p-5 bg-blue-100 rounded-lg shadow hover:bg-blue-200 focus:outline-none flex justify-between items-center">
+                        <span>Misión 2: El Juego de "¿Y Qué Si?" 🤔</span>
+                        <span class="arrow text-2xl font-bold">+</span>
+                    </button>
+                    <div class="accordion-content hidden bg-gray-50 p-4 rounded-b-lg border border-t-0 border-gray-200">
+                        <p>Cuando algo te preocupa, juega este juego en tu mente:</p>
+                        <ul class="list-none mt-2 space-y-1">
+                            <li><strong>Tú:</strong> "Me preocupa reprobar el examen."</li>
+                            <li><strong>Pregúntate:</strong> "<em>¿Y qué si repruebo?</em>"</li>
+                            <li><strong>Tú:</strong> "Estudiaré más la próxima vez."</li>
+                            <li><strong>Pregúntate:</strong> "<em>¿Eso sería el fin del mundo?</em>"</li>
+                            <li><strong>Tú:</strong> "No, solo tendría que esforzarme más."</li>
+                        </ul>
+                        <p class="mt-2 font-medium">¡Verás que la mayoría de tus preocupaciones no son tan terribles como parecen!</p>
+                    </div>
+                </div>
+                <!-- Misión 3: Bondad Secreta --><div>
+                    <button class="accordion-button w-full text-left text-xl font-bold p-5 bg-blue-100 rounded-lg shadow hover:bg-blue-200 focus:outline-none flex justify-between items-center">
+                        <span>Misión 3: La Misión Secreta de Bondad 🤫</span>
+                        <span class="arrow text-2xl font-bold">+</span>
+                    </button>
+                    <div class="accordion-content hidden bg-gray-50 p-4 rounded-b-lg border border-t-0 border-gray-200">
+                        <p>Tu misión: cada día, haz algo bueno por alguien <strong>sin que nadie se entere</strong>. Puede ser:</p>
+                        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                            <li>Ayudar a un compañero con su tarea.</li>
+                            <li>Recoger algo que se le cayó a alguien.</li>
+                            <li>Decir algo amable.</li>
+                            <li>¡Compartir tu merienda!</li>
+                        </ul>
+                        <p class="mt-2 font-medium">¿Puedes hacerlo sin decirle a nadie? ¡Ese es el verdadero desafío de un héroe!</p>
+                    </div>
+                </div>
+                <!-- Misión 4: Entrenamiento de Paciencia --><div>
+                    <button class="accordion-button w-full text-left text-xl font-bold p-5 bg-blue-100 rounded-lg shadow hover:bg-blue-200 focus:outline-none flex justify-between items-center">
+                        <span>Misión 4: Entrenamiento de Paciencia ⏳</span>
+                        <span class="arrow text-2xl font-bold">+</span>
+                    </button>
+                    <div class="accordion-content hidden bg-gray-50 p-4 rounded-b-lg border border-t-0 border-gray-200">
+                        <p>¡Los estoicos practicaban el autocontrol! Prueba estos mini-desafíos:</p>
+                        <ul class="list-disc list-inside ml-4 mt-2 space-y-1">
+                            <li>Espera 5 minutos antes de pedir un dulce.</li>
+                            <li>Cuenta hasta 10 cuando estés enojado antes de reaccionar.</li>
+                            <li>Termina tu tarea antes de jugar, aunque no quieras.</li>
+                            <li>Escucha completamente a alguien sin interrumpir.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 6: Actividad Final (Antes S5) --><section class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <h2 class="text-3xl font-bold text-center text-blue-700 mb-6">Sección 6: ¡Diseña tu Escudo Estoico! 🛡️</h2>
+            <p class="text-lg text-center mb-4">
+                Elías, un verdadero héroe necesita su propio escudo. ¡Aquí te dejamos un ejemplo para que te inspires al crear el tuyo! 
+                Recuerda que tu escudo representará los "superpoderes" que los estoicos nos enseñan.
+            </p>
+            <div class="flex justify-center mb-6">
+                <img src="https://github.com/GuillermoOseguera/Estoico/blob/main/escudo%20estoico.png?raw=true" alt="Ejemplo de Escudo Estoico" class="max-w-full h-auto rounded-lg shadow-md border-2 border-gray-300">
+            </div>
+            <p class="text-lg text-center mt-6">
+                ¡Ahora es tu turno! Dibuja tu propio escudo dividido en cuatro partes, y en cada una, dibuja o escribe un símbolo
+                para la Sabiduría (como un búho), el Coraje (como un león), la Justicia (como una balanza) y la Templanza (como una persona meditando).
+                ¡Este será tu escudo de héroe estoico, listo para recordarte tus poderes cuando enfrentes cualquier desafío!
+            </p>
+        </section>
+
+        <!-- Resumen Final --><footer class="bg-gradient-to-r from-blue-700 to-cyan-600 text-white p-8 md:p-12 text-center shadow-lg rounded-2xl">
+            <h2 class="text-3xl font-black mb-4">Resumen de Héroe 🌟</h2>
+            <p id="footer-quote" class="text-xl font-light mb-4">Cargando frase de héroe...</p>
+            <p class="text-lg font-semibold">Recuerda: ¡No puedes controlar lo que pasa, pero SÍ puedes controlar cómo reaccionas!</p>
+        </footer>
+
+    </main>
+
+    <!-- Modal de Recompensa (Oculto por defecto) --><div id="reward-modal" class="modal">
+        <div class="modal-content">
+            <button id="close-modal-button" class="modal-close-button">&times;</button>
+            <div id="reward-message-container">
+                 <h3 class="text-2xl font-bold text-green-600 mb-4">¡Felicidades, Héroe! 🎉</h3>
+                <p class="text-lg mb-6">Genial, tuviste 7 aciertos 3 veces seguidas, eso se merece un premio. Da click en el botón para obtener tu recompensa.</p>
+                <button id="reward-button" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow hover:bg-purple-700 transition duration-200">
+                    ¡Ver Recompensa!
+                </button>
+            </div>
+            <div id="reward-video-container" class="hidden mt-4">
+                 <video id="reward-video" controls>
+                    <source src="https://raw.githubusercontent.com/GuillermoOseguera/Estoico/main/videoelias.mp4" type="video/mp4">
+                    Tu navegador no soporta el video MP4.
+                </video>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para Confeti (Fuente: https://www.jsdelivr.com/package/npm/canvas-confetti) --><script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <script>
+        // --- LÓGICA PARA EL ACORDEÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordionButtons = document.querySelectorAll('.accordion-button');
+            
+            accordionButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const arrow = button.querySelector('.arrow');
+
+                    // Alternar visibilidad del contenido
+                    content.classList.toggle('hidden');
+                    
+                    // Alternar estado activo del botón
+                    if (content.classList.contains('hidden')) {
+                        button.classList.remove('active');
+                        arrow.textContent = '+';
+                    } else {
+                        button.classList.add('active');
+                        arrow.textContent = '−'; // Usar un signo menos
+                    }
+                });
+            });
+
+            // --- LÓGICA PARA ARRASTRAR Y SOLTAR (DRAG & DROP) ---
+            
+            // PASO 1: Definir la base de datos de todas las preocupaciones (más de 100)
+            const allWorries = [
+                // Contexto: General (14 años)
+                { text: "Mi reacción si saco una mala nota", correctBox: "green" },
+                { text: "El tema que vendrá en el examen", correctBox: "red" },
+                { text: "Cuántas horas estudio para el examen", correctBox: "green" },
+                { text: "Lo que mis amigos piensan de mi ropa", correctBox: "red" },
+                { text: "Ser honesto con mis padres", correctBox: "green" },
+                { text: "Que me inviten a una fiesta", correctBox: "red" },
+                { text: "Pedir ayuda en una materia que me cuesta", correctBox: "green" },
+                { text: "Lo que otros postean en redes sociales", correctBox: "red" },
+                { text: "Lo que *yo* decido postear en redes", correctBox: "green" },
+                { text: "Acostarme a una hora razonable", correctBox: "green" },
+                { text: "Tener más talento natural que otros", correctBox: "red" },
+                { text: "Mi esfuerzo en practicar algo", correctBox: "green" },
+                { text: "Si la película que quiero ver es buena", correctBox: "red" },
+                { text: "Elegir qué ropa ponerme hoy", correctBox: "green" },
+                { text: "El tráfico en el camino a la escuela", correctBox: "red" },
+                { text: "Mi actitud ante el tráfico", correctBox: "green" },
+                { text: "Que mis compañeros me hagan reír en clase", correctBox: "red" },
+                { text: "Mi decisión de prestar atención en clase", correctBox: "green" },
+                { text: "La popularidad de un influencer", correctBox: "red" },
+                { text: "La limpieza de mi habitación", correctBox: "green" },
+                { text: "El clima de hoy", correctBox: "red" },
+                { text: "Prepararme para un día lluvioso", correctBox: "green" },
+                { text: "Que me regalen algo que no me gusta", correctBox: "red" },
+                { text: "Agradecer por un regalo, aunque no me guste", correctBox: "green" },
+                { text: "El precio de mi juego favorito", correctBox: "red" },
+                { text: "Ahorrar para comprar un juego", correctBox: "green" },
+                { text: "Las opiniones políticas de otras personas", correctBox: "red" },
+                { text: "Formarme mi propia opinión", correctBox: "green" },
+                { text: "Que alguien me hable mal", correctBox: "red" },
+                { text: "Cómo respondo a alguien que me habla mal", correctBox: "green" },
+                { text: "Mi nivel de energía por la mañana", correctBox: "red" },
+                { text: "Decidir si desayuno bien o no", correctBox: "green" },
+                { text: "La cantidad de tarea que me dejan", correctBox: "red" },
+                { text: "Hacer la tarea con esfuerzo y a tiempo", correctBox: "green" },
+                { text: "El ruido de mis vecinos", correctBox: "red" },
+                { text: "Buscar un lugar tranquilo para estudiar", correctBox: "green" },
+                { text: "Si un video se hace viral", correctBox: "red" },
+                { text: "La calidad de los videos que hago", correctBox: "green" },
+                { text: "Que me critiquen en un juego online", correctBox: "red" },
+                { text: "Mi reacción a una crítica en un juego", correctBox: "green" },
+                { text: "Mi estado de ánimo general", correctBox: "red" }, // Puede ser influido, pero el control directo es limitado
+                { text: "Hacer actividades que mejoren mi ánimo", correctBox: "green" },
+                { text: "Si mi banda favorita se separa", correctBox: "red" },
+                { text: "Disfrutar la música que ya existe", correctBox: "green" },
+                { text: "La calidad de la comida en la cafetería", correctBox: "red" },
+                { text: "Elegir opciones saludables en la cafetería", correctBox: "green" },
+                { text: "Que me toque el asiento de al lado de alguien ruidoso", correctBox: "red" },
+                { text: "Mi concentración a pesar del ruido", correctBox: "green" },
+                { text: "Las decisiones del director de la escuela", correctBox: "red" },
+                { text: "Seguir las reglas de la escuela", correctBox: "green" },
+
+                // Contexto: Futbol
+                { text: "Mi actitud si pierdo el partido de futbol", correctBox: "green" },
+                { text: "Que el entrenador me ponga de titular", correctBox: "red" },
+                { text: "El resultado final del partido", correctBox: "red" },
+                { text: "El esfuerzo que pongo en el entrenamiento", correctBox: "green" },
+                { text: "Felicitar al otro equipo si nos ganan", correctBox: "green" },
+                { text: "Que llueva el día del partido", correctBox: "red" },
+                { text: "El talento de los jugadores del otro equipo", correctBox: "red" },
+                { text: "El tiempo que dedico a practicar tiros libres", correctBox: "green" },
+                { text: "Las decisiones del árbitro", correctBox: "red" },
+                { text: "Mi respeto hacia el árbitro", correctBox: "green" },
+                { text: "El estado del campo de juego", correctBox: "red" },
+                { text: "Ajustar mi juego al estado del campo", correctBox: "green" },
+                { text: "Si mis compañeros meten goles", correctBox: "red" },
+                { text: "Animar a mis compañeros", correctBox: "green" },
+                { text: "El color del uniforme del equipo contrario", correctBox: "red" },
+                { text: "Mi concentración en el juego", correctBox: "green" },
+                { text: "Una lesión inesperada de un compañero", correctBox: "red" },
+                { text: "Ayudar a un compañero lesionado", correctBox: "green" },
+                { text: "Las tácticas que el entrenador decida", correctBox: "red" },
+                { text: "Ejecutar las tácticas lo mejor posible", correctBox: "green" },
+
+                // Contexto: Familia (Jari, Elisa, Paco, Estela)
+                { text: "Ser paciente con mi hermana Elisa", correctBox: "green" },
+                { text: "Que Elisa me pida usar mi Switch", correctBox: "red" },
+                { text: "Mi reacción si Elisa me molesta", correctBox: "green" },
+                { text: "Ayudar a mi mamá Jari en la casa", correctBox: "green" },
+                { text: "Que mi mamá Jari esté de mal humor", correctBox: "red" },
+                { text: "Cumplir con lo que le prometí a mi mamá Jari", correctBox: "green" },
+                { text: "Visitar a mi abuelo Paco", correctBox: "green" },
+                { text: "Lo que mi abuelo Paco opina de mi música", correctBox: "red" },
+                { text: "Preguntarle a mi abuelo Paco sobre sus historias", correctBox: "green" },
+                { text: "Que mi mamá (Jari) me dé permiso para salir", correctBox: "red" },
+                { text: "Ayudar a mi abuela Estela con el jardín", correctBox: "green" },
+                { text: "Lo que mi abuela Estela cocine hoy", correctBox: "red" },
+                { text: "Ser amable con mis primos", correctBox: "green" },
+                { text: "Que mis tíos visiten sin avisar", correctBox: "red" },
+                { text: "Mi actitud si tenemos visitas inesperadas", correctBox: "green" },
+                { text: "Recordar el cumpleaños de un familiar", correctBox: "green" },
+                { text: "Si mi familia se muda lejos", correctBox: "red" },
+                { text: "Mantenerme en contacto con mi familia", correctBox: "green" },
+                { text: "Las discusiones entre mis padres", correctBox: "red" },
+                { text: "Mi comportamiento durante una discusión familiar", correctBox: "green" },
+
+                // Contexto: Videojuegos (Sonic, Minecraft, Switch)
+                { text: "Terminar mis tareas antes de jugar Minecraft", correctBox: "green" },
+                { text: "Que haya lag en la partida de Sonic", correctBox: "red" },
+                { text: "El tiempo que decido jugar Switch", correctBox: "green" },
+                { text: "Que un creeper explote mi casa en Minecraft", correctBox: "red" },
+                { text: "Mi reacción si un creeper lo explota todo", correctBox: "green" },
+                { text: "Ahorrar para comprar un nuevo juego de Switch", correctBox: "green" },
+                { text: "Un bug que arruina mi partida", correctBox: "red" },
+                { text: "Lo que opinan mis amigos de mi mundo en Minecraft", correctBox: "red" },
+                { text: "Que se vaya el internet mientras juego", correctBox: "red" },
+                { text: "Cuidar bien mi Nintendo Switch", correctBox: "green" },
+                { text: "El anuncio de un nuevo juego de Sonic", correctBox: "red" },
+                { text: "Mi comportamiento justo en un juego online", correctBox: "green" },
+                { text: "Que un tramposo gane en mi juego favorito", correctBox: "red" },
+                { text: "Reportar a un tramposo", correctBox: "green" },
+                { text: "La dificultad de un nivel de juego", correctBox: "red" },
+                { text: "Mi persistencia para pasar un nivel difícil", correctBox: "green" },
+                { text: "Los gráficos de un juego viejo", correctBox: "red" },
+                { text: "Disfrutar la historia o la jugabilidad de un juego", correctBox: "green" },
+                { text: "Que mis amigos prefieran otro juego", correctBox: "red" },
+                { text: "Estar abierto a probar nuevos juegos", correctBox: "green" },
+
+                // Contexto: Actividades (Natación, Karate)
+                { text: "Ir a natación aunque esté cansado", correctBox: "green" },
+                { text: "Ser el más rápido de la alberca", correctBox: "red" },
+                { text: "Mi esfuerzo en la clase de natación", correctBox: "green" },
+                { text: "Lo que opinaban mis amigos de que hacía karate", correctBox: "red" },
+                { text: "Decidir si quiero probar karate otra vez", correctBox: "green" },
+                { text: "Aplicar la disciplina que aprendí en karate", correctBox: "green" },
+                { text: "El estilo de nadar de mis compañeros", correctBox: "red" },
+                { text: "Mi concentración en los ejercicios de karate", correctBox: "green" },
+                { text: "Si la clase de natación se cancela", correctBox: "red" },
+                { text: "Buscar otra forma de hacer ejercicio si se cancela la clase", correctBox: "green" },
+                { text: "El tamaño de los oponentes en karate", correctBox: "red" },
+                { text: "Mi técnica en karate, no solo la fuerza", correctBox: "green" },
+                { text: "Ganar una medalla en natación", correctBox: "red" },
+                { text: "Mejorar mi tiempo en natación", correctBox: "green" },
+                { text: "El equipo de natación que me toca", correctBox: "red" },
+                { text: "Ser un buen compañero de equipo", correctBox: "green" },
+                { text: "Que mi instructor me corrija mucho", correctBox: "red" },
+                { text: "Aceptar las correcciones de mi instructor", correctBox: "green" },
+                { text: "El número de cinturones que tengo en karate", correctBox: "red" },
+                { text: "Mi progreso en las katas de karate", correctBox: "green" }
+            ];
+
+            // PASO 2: Obtener elementos del DOM (Juego Drag & Drop)
+            const dropZones = document.querySelectorAll('.drop-zone');
+            const worriesList = document.getElementById('worries-list');
+            const resetButton = document.getElementById('reset-button');
+            const checkButton = document.getElementById('check-button');
+            const resultsArea = document.getElementById('results-area');
+            let draggables = []; // Se llenará dinámicamente
+            let consecutivePerfectScores = 0; // NUEVO: Contador de rachas
+            const streakCounterEl = document.getElementById('streak-counter'); // NUEVO: Elemento para mostrar la racha
+
+            // PASO 3: Función para mezclar el array (Fisher-Yates)
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+            }
+
+            // PASO 4: Función para (re)poblar la lista de 7 elementos
+            function populateWorriesList() {
+                worriesList.innerHTML = ''; // Limpiar lista
+                // Limpiar cajas
+                document.getElementById('box-green').innerHTML = '';
+                document.getElementById('box-red').innerHTML = '';
+
+                shuffleArray(allWorries);
+                const randomWorries = allWorries.slice(0, 7);
+
+                randomWorries.forEach((worry, index) => {
+                    const div = document.createElement('div');
+                    const id = `worry${index + 1}`; // ID único para el drag-and-drop
+                    div.id = id;
+                    const class_base = "draggable bg-white p-4 rounded-lg shadow border border-gray-200 text-center font-medium";
+                    div.setAttribute('class_base', class_base);
+                    div.className = class_base;
+                    div.setAttribute('draggable', 'true');
+                    div.setAttribute('data-correct-box', worry.correctBox);
+                    div.textContent = worry.text;
+                    worriesList.appendChild(div);
+                });
+
+                // Ocultar y limpiar resultados
+                resultsArea.textContent = '';
+                resultsArea.classList.add('hidden');
+                // Actualizar contador visual de racha
+                 if (streakCounterEl) streakCounterEl.textContent = `Racha de aciertos perfectos: ${consecutivePerfectScores}`;
+            }
+
+            // PASO 5: Función para (re)configurar los listeners de drag/drop
+            function setupDraggables() {
+                // (Re)seleccionar los draggables
+                draggables = document.querySelectorAll('[draggable="true"]');
+                
+                // 1. Añadir listeners a los elementos arrastrables
+                draggables.forEach(draggable => {
+                    draggable.addEventListener('dragstart', (e) => {
+                        draggable.classList.add('dragging');
+                        e.dataTransfer.setData('text/plain', draggable.id);
+                    });
+                    
+                    draggable.addEventListener('dragend', () => {
+                        draggable.classList.remove('dragging');
+                    });
+                });
+            }
+
+            // PASO 6: Configurar las zonas de soltar (solo se hace una vez)
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault(); // ¡Muy importante! Permite que se pueda "soltar"
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    const id = e.dataTransfer.getData('text/plain');
+                    const draggableElement = document.getElementById(id);
+                    if (draggableElement) {
+                        zone.appendChild(draggableElement);
+                        // Limpiar el feedback de correcto/incorrecto al moverlo
+                        draggableElement.className = draggableElement.getAttribute('class_base');
+                        // Ocultar resultados si se mueve algo después de comprobar
+                        resultsArea.classList.add('hidden');
+                    }
+                });
+            });
+
+            // PASO 7: Lógica del botón de comprobar (MODIFICADO para racha y modal)
+            checkButton.addEventListener('click', () => {
+                let correctCount = 0;
+                const totalItems = draggables.length;
+                let allPlaced = true; // Variable para verificar si todos los items están en alguna caja
+
+                 // Verificar si todos los items están en alguna caja
+                draggables.forEach(draggable => {
+                    if (!draggable.parentElement || (draggable.parentElement.id !== 'box-green' && draggable.parentElement.id !== 'box-red')) {
+                        allPlaced = false;
+                    }
+                     // Restaurar clase base para limpiar feedback anterior
+                    draggable.className = draggable.getAttribute('class_base');
+                });
+
+                if (!allPlaced) {
+                    resultsArea.textContent = `¡Debes colocar todas las situaciones en alguna caja!`;
+                    resultsArea.classList.remove('hidden');
+                    resultsArea.className = "text-center text-xl font-bold p-3 bg-red-100 border border-red-300 rounded-lg text-red-700"; // Estilo de error
+                     consecutivePerfectScores = 0; // Reiniciar racha si no completó
+                     if (streakCounterEl) streakCounterEl.textContent = `Racha de aciertos perfectos: ${consecutivePerfectScores}`;
+                    return; // Detener la comprobación
+                }
+
+
+                draggables.forEach(draggable => {
+                    const correctBox = draggable.getAttribute('data-correct-box');
+                    const parentBox = draggable.parentElement;
+                    let isCorrect = false;
+
+                    if (correctBox === 'green' && parentBox.id === 'box-green') {
+                        isCorrect = true;
+                    } else if (correctBox === 'red' && parentBox.id === 'box-red') {
+                        isCorrect = true;
+                    }
+
+                    // Aplicar feedback visual
+                    if (isCorrect) {
+                        correctCount++;
+                        draggable.classList.add('item-correct');
+                    } else if (parentBox.id === 'box-green' || parentBox.id === 'box-red') {
+                        draggable.classList.add('item-incorrect');
+                    }
+                });
+
+                // Mostrar resultados
+                resultsArea.textContent = `¡Acertaste ${correctCount} de ${totalItems}! ${correctCount === totalItems ? '🎉' : '👍'}`;
+                resultsArea.classList.remove('hidden');
+                // Restaurar estilo normal de resultados
+                resultsArea.className = "hidden text-center text-xl font-bold p-3 bg-yellow-100 border border-yellow-300 rounded-lg";
+                resultsArea.classList.remove('hidden');
+
+
+                // Lógica de racha y modal
+                if (correctCount === totalItems) {
+                    consecutivePerfectScores++;
+                    // Disparar confeti por acierto perfecto
+                    if (typeof confetti === 'function') { 
+                        confetti({
+                            particleCount: 150,
+                            spread: 90,
+                            origin: { y: 0.6 }
+                        });
+                    }
+                     // Comprobar si se alcanzó la racha de 3
+                    if (consecutivePerfectScores >= 3) {
+                        showRewardModal();
+                        consecutivePerfectScores = 0; // Reiniciar racha después de mostrar el premio
+                    }
+                } else {
+                    consecutivePerfectScores = 0; // Reiniciar racha si no fue perfecto
+                }
+                
+                // Actualizar contador visual de racha
+                 if (streakCounterEl) streakCounterEl.textContent = `Racha de aciertos perfectos: ${consecutivePerfectScores}`;
+
+            });
+
+            // PASO 8: Lógica del botón de reiniciar
+            resetButton.addEventListener('click', () => {
+                // Genera 7 nuevos elementos
+                populateWorriesList(); 
+                // Les asigna los listeners de drag-and-drop
+                setupDraggables();     
+                // NO reinicia la racha aquí, solo si fallan en checkButton
+            });
+
+             // --- LÓGICA PARA EL MODAL DE RECOMPENSA ---
+            const rewardModal = document.getElementById('reward-modal');
+            const closeModalButton = document.getElementById('close-modal-button');
+            const rewardButton = document.getElementById('reward-button');
+            const rewardMessageContainer = document.getElementById('reward-message-container');
+            const rewardVideoContainer = document.getElementById('reward-video-container');
+            const rewardVideo = document.getElementById('reward-video');
+
+            function showRewardModal() {
+                // Resetear modal al estado inicial (mensaje visible, video oculto)
+                rewardMessageContainer.classList.remove('hidden');
+                rewardVideoContainer.classList.add('hidden');
+                rewardVideo.pause(); // Pausar video si estaba reproduciéndose
+                rewardVideo.currentTime = 0; // Reiniciar video
+                
+                rewardModal.classList.add('active');
+            }
+
+            function hideRewardModal() {
+                 rewardModal.classList.remove('active');
+                 rewardVideo.pause(); // Pausar video al cerrar
+            }
+
+             if(closeModalButton) {
+                 closeModalButton.addEventListener('click', hideRewardModal);
+             }
+             // Cerrar modal si se hace clic fuera del contenido
+             if(rewardModal) {
+                 rewardModal.addEventListener('click', (event) => {
+                    if (event.target === rewardModal) {
+                        hideRewardModal();
+                    }
+                });
+            }
+
+            if(rewardButton) {
+                rewardButton.addEventListener('click', () => {
+                    rewardMessageContainer.classList.add('hidden');
+                    rewardVideoContainer.classList.remove('hidden');
+                    rewardVideo.play().catch(error => {
+                         // Autoplay puede ser bloqueado, manejar error si es necesario
+                        console.error("Error al intentar reproducir video automáticamente:", error);
+                    });
+                });
+            }
+
+
+            // --- LÓGICA PARA EL DESAFÍO DE VIRTUDES ---
+
+            // A. Base de datos de desafíos (¡AMPLIADA!)
+            const allChallenges = [
+                // Originales
+                {
+                    scenario: "Estás jugando Minecraft y un creeper destruye la casa que te tomó horas construir. Sientes ganas de lanzar el control.",
+                    correctVirtue: "templanza",
+                    feedback: {
+                        sabiduria: "¡Casi! La sabiduría te diría que es solo un juego, pero la Templanza es el poder específico para *controlar* tu reacción de enojo en el momento.",
+                        coraje: "No se necesita coraje aquí, ya que no hay peligro. Lo que se necesita es calma.",
+                        justicia: "El creeper no fue 'injusto', ¡solo hizo lo que hacen los creepers! El poder que necesitas es el autocontrol.",
+                        templanza: "¡Correcto! La Templanza (Autocontrol) es el superpoder que usas para respirar hondo, no lanzar el control y recordar que puedes reconstruirlo."
+                    }
+                },
+                {
+                    scenario: "Tus amigos te invitan a jugar fútbol, pero tienes un examen importante mañana y tu abuelo Paco te aconsejó estudiar.",
+                    correctVirtue: "sabiduria",
+                    feedback: {
+                        sabiduria: "¡Exacto! La Sabiduría es el poder de ver el futuro (el examen de mañana) y tomar la decisión inteligente, aunque no sea la más divertida ahora.",
+                        coraje: "Podría necesitarse un poco de coraje para decir 'no' a tus amigos, pero la virtud principal que usas para *decidir* es la sabiduría.",
+                        justicia: "No es una cuestión de justicia. Es una decisión sobre tus prioridades.",
+                        templanza: "La templanza te ayudaría a *no* jugar todo el día, pero la Sabiduría es la que te dice *por qué* no deberías hacerlo."
+                    }
+                },
+                {
+                    scenario: "Estás en el Nintendo Switch y tu hermana Elisa te exige que se lo prestes *ya mismo*. Tu primer instinto es decirle que se vaya.",
+                    correctVirtue: "justicia",
+                    feedback: {
+                        sabiduria: "La sabiduría te ayudaría a planear una solución, pero la Justicia es el poder que te recuerda *considerar* los sentimientos y derechos de Elisa.",
+                        coraje: "No se requiere coraje en esta situación.",
+                        justicia: "¡Sí! La Justicia es el poder de ser justo con los demás. Te hace preguntar: '¿Es justo que yo juegue todo el tiempo? ¿Hicimos un trato?'. Te ayuda a encontrar una solución justa para ambos.",
+                        templanza: "Necesitas Templanza para *no* gritarle, pero la Justicia es la que te guía a *cómo* actuar con ella de forma correcta."
+                    }
+                },
+                {
+                    scenario: "Tu entrenador de fútbol te pide que intentes una nueva posición que te da miedo porque no sabes jugarla bien.",
+                    correctVirtue: "coraje",
+                    feedback: {
+                        sabiduria: "La sabiduría es saber que es bueno aprender cosas nuevas, pero el poder que necesitas para *superar el miedo* es el coraje.",
+                        coraje: "¡Correcto! El Coraje no es no tener miedo. Es tener miedo (a fallar, a verte mal) pero hacerlo de todos modos por un bien mayor (ayudar al equipo, aprender).",
+                        justicia: "Esto no es sobre justicia, es sobre enfrentar un desafío personal.",
+                        templanza: "La templanza te ayudaría a no frustrarte si fallas, pero el Coraje es lo que te hace intentarlo en primer lugar."
+                    }
+                },
+                {
+                    scenario: "Tu mamá (Jari) y tu abuela (Estela) te piden ayuda con las bolsas del súper. Estás a punto de ganar una carrera de Sonic.",
+                    correctVirtue: "justicia",
+                    feedback: {
+                        sabiduria: "La sabiduría te diría que la familia es importante, pero la Justicia es el poder de la 'responsabilidad' y de hacer lo correcto por tu familia.",
+                        coraje: "No requiere coraje, solo requiere dejar algo divertido por algo que se debe hacer.",
+                        justicia: "¡Perfecto! La Justicia también significa ser un buen miembro de tu familia y comunidad. Pausar el juego para ayudar a Jari y Estela es la acción 'justa' y correcta.",
+                        templanza: "Necesitas templanza para *no* quejarte, pero la Justicia es la que te dice *por qué* debes ir a ayudar."
+                    }
+                },
+                 // Nuevos Desafíos (50+)
+                {
+                    scenario: "Un compañero se burla de tus tenis nuevos en la escuela. Te sientes avergonzado y enojado.",
+                    correctVirtue: "coraje",
+                    feedback: {
+                        sabiduria: "La sabiduría te dice que su opinión no define el valor de tus tenis ni el tuyo, pero el Coraje te da la fuerza para no dejar que te afecte.",
+                        coraje: "¡Sí! El Coraje es ignorar la burla o responder con calma, sabiendo que tú vales más que una opinión ajena. Es no dejar que el miedo a la crítica te domine.",
+                        justicia: "Aunque la burla es injusta, la virtud principal aquí es manejar tu propia reacción interna con fortaleza.",
+                        templanza: "La Templanza ayuda a no reaccionar exageradamente, pero el Coraje es la fortaleza interior para no sentirte mal por la burla."
+                    }
+                },
+                {
+                    scenario: "Tienes mucha tarea, pero tus amigos te están esperando online para jugar Minecraft.",
+                    correctVirtue: "templanza",
+                    feedback: {
+                        sabiduria: "La Sabiduría te dice que la tarea es importante, pero la Templanza es el superpoder del autocontrol para *hacer* primero lo que debes.",
+                        coraje: "No se necesita coraje, sino disciplina.",
+                        justicia: "Es una cuestión de responsabilidad personal, más que de justicia hacia otros.",
+                        templanza: "¡Exacto! Templanza es resistir la tentación de jugar ahora y tener la disciplina para terminar tus deberes primero. ¡El juego puede esperar!"
+                    }
+                },
+                {
+                    scenario: "En natación, ves que un compañero tiene dificultades para aprender una brazada nueva y otros se ríen.",
+                    correctVirtue: "justicia",
+                    feedback: {
+                        sabiduria: "La sabiduría te diría que todos aprenden a ritmos diferentes, pero la Justicia te impulsa a actuar correctamente.",
+                        coraje: "Podrías necesitar coraje para defenderlo, pero la motivación principal viene de la Justicia.",
+                        justicia: "¡Correcto! La Justicia es defender al que lo necesita, no participar en la burla y, si te animas, ofrecerle ayuda o ánimo. Es tratar a los demás con respeto.",
+                        templanza: "La templanza ayuda a no reírte tú, pero la Justicia te pide ir más allá y ser solidario."
+                    }
+                },
+                {
+                    scenario: "Tu abuela Estela te cuenta la misma historia por décima vez. Te aburres.",
+                    correctVirtue: "templanza",
+                    feedback: {
+                        sabiduria: "La sabiduría es entender que ella disfruta contándola, pero la Templanza es el poder de la paciencia.",
+                        coraje: "No se necesita coraje aquí.",
+                        justicia: "Podría argumentarse que es 'justo' escucharla, pero la virtud clave es el autocontrol de tu aburrimiento.",
+                        templanza: "¡Exacto! Templanza es tener la paciencia para escucharla con atención y amabilidad, aunque ya te sepas la historia. Es controlar tu impaciencia."
+                    }
+                },
+                 {
+                    scenario: "En un partido de fútbol, el árbitro marca una falta en tu contra que claramente no cometiste.",
+                    correctVirtue: "templanza",
+                    feedback: {
+                        sabiduria: "La sabiduría te dice que discutir no cambiará la decisión, pero la Templanza controla tu reacción.",
+                        coraje: "Se necesita coraje para aceptar una decisión injusta sin explotar, pero la Templanza es el autocontrol directo.",
+                        justicia: "La situación es injusta, pero tu reacción debe ser controlada. La virtud principal aquí es la Templanza.",
+                        templanza: "¡Correcto! Templanza es controlar tu frustración, no gritarle al árbitro y seguir jugando concentrado. Aceptar lo que no puedes cambiar (la decisión)."
+                    }
+                },
+                {
+                    scenario: "Te enteras de que un amigo habló mal de ti a tus espaldas.",
+                    correctVirtue: "sabiduria",
+                    feedback: {
+                        sabiduria: "¡Sí! La Sabiduría es detenerte a pensar antes de reaccionar. ¿Es verdad? ¿Vale la pena confrontarlo? ¿Cómo hacerlo de forma constructiva? Pensar antes de actuar.",
+                        coraje: "Podrías necesitar Coraje para hablar con él, pero primero necesitas Sabiduría para decidir *si* debes hacerlo y *cómo*.",
+                        justicia: "Lo que hizo no fue justo, pero tu primera virtud a usar es la Sabiduría para analizar la situación.",
+                        templanza: "Necesitas Templanza para no explotar, pero la guía principal viene de la Sabiduría."
+                    }
+                },
+                 {
+                    scenario: "Quieres comprar el nuevo juego de Sonic, pero sabes que debes ahorrar para el regalo de cumpleaños de tu mamá Jari.",
+                    correctVirtue: "templanza",
+                    feedback: {
+                        sabiduria: "La sabiduría te dice que el regalo es importante, pero la Templanza es el autocontrol para *no* gastar el dinero ahora.",
+                        coraje: "No se requiere coraje, sino disciplina financiera.",
+                        justicia: "Es un acto de cariño hacia tu mamá, relacionado con la Justicia (ser buen hijo), pero la virtud directa es el autocontrol.",
+                        templanza: "¡Exacto! Templanza es resistir el deseo inmediato del juego por un bien mayor a futuro (el regalo). Es autocontrol sobre tus impulsos de compra."
+                    }
+                },
+                {
+                    scenario: "Tu hermana Elisa rompe accidentalmente algo tuyo que te gustaba mucho.",
+                    correctVirtue: "templanza",
+                    feedback: {
+                        sabiduria: "La sabiduría te ayuda a entender que fue un accidente, pero la Templanza gestiona tu enojo.",
+                        coraje: "No se necesita coraje aquí.",
+                        justicia: "Podrías pedir que lo reponga si es justo, pero la primera reacción a controlar es tu enojo, usando Templanza.",
+                        templanza: "¡Correcto! Es normal sentir enojo, pero la Templanza te ayuda a respirar, no gritarle, y recordar que los accidentes pasan. Es controlar tu reacción inicial."
+                    }
+                },
+                {
+                    scenario: "Debes presentar un trabajo oral en clase y te da mucho pánico hablar en público.",
+                    correctVirtue: "coraje",
+                    feedback: {
+                        sabiduria: "La sabiduría te dice que prepararte bien te ayudará, pero el poder para *enfrentar* el miedo es el Coraje.",
+                        coraje: "¡Sí! El Coraje es hacer la presentación aunque sientas miedo o nervios. Es actuar a pesar del pánico.",
+                        justicia: "No aplica directamente aquí.",
+                        templanza: "La templanza te ayuda a mantener la calma *durante* la presentación, pero el Coraje es lo que te hace subir ahí."
+                    }
+                },
+                {
+                    scenario: "Tu equipo de fútbol pierde un partido importante por un error tuyo.",
+                    correctVirtue: "coraje",
+                    feedback: {
+                        sabiduria: "La sabiduría te dice que todos cometen errores y que puedes aprender de esto, pero el Coraje te ayuda a afrontarlo.",
+                        coraje: "¡Exacto! Coraje es aceptar tu error, no esconderte ni culpar a otros, y seguir entrenando para mejorar. Es la fortaleza para enfrentar la decepción.",
+                        justicia: "No es sobre justicia, es sobre asumir responsabilidad.",
+                        templanza: "La templanza te ayuda a no hundirte en la tristeza, pero el Coraje es la fuerza para levantarte después del error."
+                    }
+                },
+                {
+                    scenario: "Estás muy cansado después de natación y no quieres hacer la tarea.",
+                    correctVirtue: "templanza",
+                     feedback: { sabiduria:"La Sabiduría te dice que es mejor hacerla ahora.", coraje:"No se requiere coraje.", justicia:"Es justo contigo mismo cumplir.", templanza:"¡Sí! Templanza es la disciplina para hacer lo que debes, aunque estés cansado." }
+                },
+                {
+                    scenario: "Un amigo te presiona para hacer algo que sabes que está mal (ej. copiar en examen).",
+                    correctVirtue: "coraje",
+                     feedback: { sabiduria:"La Sabiduría te dice que está mal.", coraje:"¡Correcto! Coraje es decir 'no' a la presión de grupo y mantenerte firme en tus principios.", justicia:"Copiar es injusto.", templanza:"..." }
+                },
+                {
+                    scenario: "Ves a alguien tirando basura en la calle.",
+                    correctVirtue: "justicia",
+                     feedback: { sabiduria:"Sabes que está mal.", coraje:"Podría requerir coraje decirle algo, pero la motivación es la Justicia.", justicia:"¡Sí! Justicia es preocuparse por el bien común y el medio ambiente. Podrías recogerla tú o decirle algo (con Sabiduría).", templanza:"..." }
+                },
+                 {
+                    scenario: "Quieres ver un video más en YouTube, pero ya es tu hora de dormir.",
+                    correctVirtue: "templanza",
+                     feedback: { sabiduria:"La Sabiduría sabe que dormir es importante.", coraje:"...", justicia:"...", templanza:"¡Exacto! Templanza es apagar el dispositivo y cumplir con tu horario." }
+                },
+                {
+                    scenario: "Te das cuenta de que recibiste cambio de más en la tienda.",
+                    correctVirtue: "justicia",
+                     feedback: { sabiduria:"La Sabiduría sabe que devolverlo es lo correcto.", coraje:"...", justicia:"¡Correcto! Justicia es ser honesto y devolver lo que no te pertenece.", templanza:"..." }
+                },
+                 {
+                    scenario: "Te cuesta entender un tema de matemáticas y sientes ganas de rendirte.",
+                    correctVirtue: "coraje",
+                     feedback: { sabiduria:"La Sabiduría es buscar ayuda o diferentes métodos.", coraje:"¡Sí! Coraje es la persistencia para seguir intentando aunque sea difícil.", justicia:"...", templanza:"..." }
+                },
+                {
+                    scenario: "Tu abuelo Paco te pide ayuda con su celular, pero te parece complicado.",
+                    correctVirtue: "justicia",
+                     feedback: { sabiduria:"...", coraje:"...", justicia:"¡Exacto! Justicia es ser paciente y ayudar a tu familia, aunque requiera esfuerzo.", templanza:"Necesitas Templanza (paciencia) pero la motivación es la Justicia." }
+                },
+                 {
+                    scenario: "Gastaste todo tu dinero en un juego y ahora no tienes para salir con amigos.",
+                    correctVirtue: "sabiduria",
+                     feedback: { sabiduria:"¡Sí! Sabiduría es aprender de este error para planificar mejor tus gastos la próxima vez.", coraje:"...", justicia:"...", templanza:"Faltó Templanza al gastar, pero la virtud a aplicar ahora es la Sabiduría para aprender." }
+                },
+                 {
+                    scenario: "Estás jugando Sonic y tu mamá Jari te llama para poner la mesa.",
+                    correctVirtue: "justicia",
+                     feedback: { sabiduria:"...", coraje:"...", justicia:"¡Correcto! Justicia es cumplir con tus responsabilidades en casa.", templanza:"Necesitas Templanza para pausar el juego sin quejarte." }
+                },
+                {
+                   scenario: "Un amigo te cuenta un secreto y te pide que no se lo digas a nadie.",
+                   correctVirtue: "justicia",
+                   feedback: { sabiduria:"...", coraje:"...", justicia:"¡Sí! Justicia es ser leal y mantener tu palabra.", templanza:"..."}
+                },
+                {
+                    scenario: "Tienes la opción de comer una ensalada o una pizza entera para cenar.",
+                    correctVirtue: "templanza",
+                    feedback: { sabiduria:"La Sabiduría sabe qué es más saludable.", coraje:"...", justicia:"...", templanza:"¡Exacto! Templanza es elegir la moderación y lo que es bueno para ti a largo plazo."}
+                },
+                {
+                    scenario: "Ves que están molestando a un chico nuevo en la escuela.",
+                    correctVirtue: "coraje",
+                    feedback: { sabiduria:"...", coraje:"¡Sí! Coraje es intervenir y defender al que está siendo maltratado, aunque te dé miedo.", justicia:"La motivación es la Justicia, pero la acción requiere Coraje.", templanza:"..."}
+                },
+                 {
+                    scenario: "No entiendes la explicación del profesor, pero te da vergüenza preguntar.",
+                    correctVirtue: "coraje",
+                    feedback: { sabiduria:"La Sabiduría sabe que preguntar es bueno.", coraje:"¡Correcto! Coraje es superar la vergüenza y levantar la mano para aclarar tu duda.", justicia:"...", templanza:"..."}
+                },
+                 {
+                    scenario: "Tu equipo de fútbol va perdiendo 3-0 al medio tiempo.",
+                    correctVirtue: "coraje",
+                    feedback: { sabiduria:"...", coraje:"¡Sí! Coraje es no rendirse, seguir luchando y animar a tus compañeros a pesar del resultado adverso.", justicia:"...", templanza:"La Templanza ayuda a no desesperarse."}
+                },
+                {
+                   scenario: "Encuentras una cartera perdida en el parque.",
+                   correctVirtue: "justicia",
+                   feedback: { sabiduria:"...", coraje:"...", justicia:"¡Exacto! Justicia es hacer lo correcto: buscar al dueño o entregarla a las autoridades.", templanza:"..."}
+                },
+                 {
+                    scenario: "Quieres pasar todo el sábado jugando videojuegos, pero sabes que tienes que ayudar a tu abuela Estela.",
+                    correctVirtue: "justicia",
+                    feedback: { sabiduria:"...", coraje:"...", justicia:"¡Sí! Justicia es equilibrar tu diversión con tus responsabilidades familiares.", templanza:"Necesitas Templanza para limitar tu tiempo de juego."}
+                },
+                {
+                   scenario: "Un amigo te pide que le mientas a sus padres por él.",
+                   correctVirtue: "justicia",
+                   feedback: { sabiduria:"La Sabiduría sabe que mentir está mal.", coraje:"Necesitas Coraje para decir no.", justicia:"¡Correcto! Justicia es ser honesto y no participar en engaños.", templanza:"..."}
+                },
+                 {
+                    scenario: "Te sientes frustrado porque no te sale un truco nuevo en la patineta.",
+                    correctVirtue: "templanza",
+                    feedback: { sabiduria:"...", coraje:"Necesitas Coraje para seguir intentando.", justicia:"...", templanza:"¡Sí! Templanza es manejar la frustración, ser paciente contigo mismo y seguir practicando con calma."}
+                },
+                // ... (Añadir hasta completar más de 50)
+            ];
+
+
+            let currentChallengeIndex = 0; // Se declara aquí, fuera de la función de historias
+            
+            // B. Obtener elementos del DOM
+            const scenarioTextEl = document.getElementById('scenario-text');
+            const virtueButtonsEl = document.getElementById('virtue-buttons');
+            const virtueFeedbackEl = document.getElementById('virtue-feedback');
+            const nextChallengeButtonEl = document.getElementById('next-challenge-button');
+            const allVirtueButtons = virtueButtonsEl.querySelectorAll('.virtue-button');
+            
+            // C. Función para cargar un desafío
+            function loadChallenge(index) {
+                 if (!allChallenges || allChallenges.length === 0) {
+                     console.error("La lista de desafíos está vacía o no definida.");
+                     return; 
+                 }
+                 // Asegurarse de que el índice es válido
+                 const validIndex = index % allChallenges.length; 
+                 const challenge = allChallenges[validIndex];
+                 
+                if (!challenge) {
+                    console.error(`No se encontró desafío en el índice ${validIndex}`);
+                    return;
+                }
+
+                if (scenarioTextEl) {
+                     scenarioTextEl.textContent = challenge.scenario;
+                } else {
+                     console.error("Elemento 'scenario-text' no encontrado.");
+                 }
+                
+                // Resetear botones y feedback
+                 if (virtueFeedbackEl) virtueFeedbackEl.classList.add('hidden');
+                 if (nextChallengeButtonEl) nextChallengeButtonEl.classList.add('hidden');
+                 
+                allVirtueButtons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+            }
+
+            // D. Función para manejar la elección
+            function handleVirtueChoice(e) {
+                const chosenVirtue = e.currentTarget.getAttribute('data-virtue');
+                const challenge = allChallenges[currentChallengeIndex];
+
+                 if (!challenge || !challenge.feedback) {
+                    console.error("Desafío actual o feedback no definido.");
+                    return; // Salir si no hay desafío o feedback
+                 }
+
+                const feedback = challenge.feedback[chosenVirtue];
+                const isCorrect = (chosenVirtue === challenge.correctVirtue);
+
+                // Mostrar feedback
+                 if (virtueFeedbackEl) {
+                     virtueFeedbackEl.textContent = feedback || "Feedback no disponible."; // Mensaje por defecto
+                     virtueFeedbackEl.classList.remove('hidden');
+                     if (isCorrect) {
+                         virtueFeedbackEl.className = "min-h-[100px] p-4 rounded-lg text-center text-lg font-medium bg-green-100 text-green-800 border border-green-300";
+                         // ¡NUEVO! Disparar confeti si la respuesta es correcta
+                          if (typeof confetti === 'function') {
+                             confetti({
+                                 particleCount: 100,
+                                 spread: 70,
+                                 origin: { y: 0.6 }
+                             });
+                         }
+                     } else {
+                         virtueFeedbackEl.className = "min-h-[100px] p-4 rounded-lg text-center text-lg font-medium bg-yellow-100 text-yellow-800 border border-yellow-300";
+                     }
+                 } else {
+                     console.error("Elemento 'virtue-feedback' no encontrado.");
+                 }
+
+                // Desactivar botones y mostrar "Siguiente"
+                allVirtueButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                });
+                 if (nextChallengeButtonEl) nextChallengeButtonEl.classList.remove('hidden');
+            }
+
+            // E. Asignar Event Listeners
+            allVirtueButtons.forEach(btn => {
+                btn.addEventListener('click', handleVirtueChoice);
+            });
+
+             if (nextChallengeButtonEl) {
+                nextChallengeButtonEl.addEventListener('click', () => {
+                    currentChallengeIndex++;
+                    // Ya no reiniciamos si currentChallengeIndex >= allChallenges.length
+                    // Usamos el módulo (%) en loadChallenge para ciclar
+                    loadChallenge(currentChallengeIndex); 
+                });
+            }
+
+
+            // --- LÓGICA PARA EL VISOR DE HISTORIAS ---
+
+            // A. Base de datos de todas las historias
+            const allStories = [
+                // Historias Clásicas
+                {
+                    id: "epicteto",
+                    title: "Epicteto, el Esclavo Sabio",
+                    colorScheme: "cyan",
+                    paragraphs: [
+                        "Había una vez un hombre llamado Epicteto que nació como esclavo. Tenía un dueño cruel que un día ¡le rompió la pierna! 😢",
+                        "En lugar de enojarse toda su vida, Epicteto decidió: 'No puedo controlar lo que me hicieron, pero <strong>SÍ puedo controlar cómo pienso</strong> sobre ello.'",
+                        "Estudió, aprendió, y cuando fue libre, se convirtió en uno de los maestros más sabios de la historia. Enseñó que nuestra verdadera libertad está en nuestra mente."
+                    ],
+                    lesson: "No importa qué cosas malas te pasen, siempre puedes elegir cómo responder."
+                },
+                {
+                    id: "marco_aurelio",
+                    title: "El Emperador que Escribía su Diario",
+                    colorScheme: "amber",
+                    paragraphs: [
+                        "Marco Aurelio era el hombre más poderoso del mundo: ¡era emperador de Roma! Tenía ejércitos, palacios y todo el oro que puedas imaginar. 👑",
+                        "Pero cada noche, escribía en su diario recordándose a sí mismo: 'No importa que sea emperador, sigo siendo solo una persona. Debo ser bueno, justo y sabio.'",
+                        "Incluso el hombre más poderoso necesitaba recordarse ser humilde y bueno cada día."
+                    ],
+                    lesson: "No importa quién eres, siempre debes trabajar en ser una mejor persona."
+                },
+                {
+                    id: "seneca",
+                    title: "Séneca y el Emperador Loco",
+                    colorScheme: "red",
+                    paragraphs: [
+                        "Séneca fue el maestro del joven emperador Nerón. Pero Nerón se volvió cruel y peligroso. Al final, Nerón ordenó a Séneca que se quitara la vida.",
+                        "Séneca no podía controlar la orden de Nerón, pero sí podía controlar cómo morir: con dignidad y calma.",
+                        "Enfrentó su destino sin miedo, consolando a sus amigos y manteniéndose fiel a sus principios hasta el final."
+                    ],
+                    lesson: "No controlas las acciones de los demás, por injustas que sean. Solo controlas tu propia integridad."
+                },
+                {
+                    id: "zenon",
+                    title: "Zenón y el Naufragio",
+                    colorScheme: "blue",
+                    paragraphs: [
+                        "Zenón de Citio, el fundador del estoicismo, era un comerciante muy rico. Un día, una tormenta hundió su barco y perdió toda su fortuna.",
+                        "Llegó a Atenas sin nada. En lugar de lamentarse, dijo: 'La fortuna me ordena ser un filósofo con menos equipaje'.",
+                        "Empezó a estudiar filosofía y se dio cuenta de que perder sus cosas materiales le había dado la libertad de encontrar la sabiduría. Lo que parecía un desastre, fue su mayor suerte."
+                    ],
+                    lesson: "A veces, perder lo que *tienes* te ayuda a encontrar lo que *eres*."
+                },
+                {
+                    id: "cato",
+                    title: "Cato, el Incorruptible",
+                    colorScheme: "gray",
+                    paragraphs: [
+                        "Cato el Joven era un político romano famoso por ser terco... ¡tercamente honesto! Vivió cuando el dictador Julio César estaba tomando el poder.",
+                        "César intentó sobornarlo, amenazarlo y hacerlo cambiar de bando. Pero Cato se negó.",
+                        "Prefirió morir defendiendo la República que vivir bajo las órdenes de un tirano. Para él, sus principios eran más importantes que su vida."
+                    ],
+                    lesson: "El verdadero coraje es defender lo que es correcto, sin importar el precio."
+                },
+                {
+                    id: "eleccion_hercules",
+                    title: "La Elección de Hércules",
+                    colorScheme: "green",
+                    paragraphs: [
+                        "Cuando Hércules era joven, se encontró en una encrucijada. Dos diosas se le aparecieron: una era Kakia (vicio) y la otra Areté (virtud).",
+                        "Kakia le ofreció una vida fácil, llena de fiestas, lujos y sin esfuerzo. Areté le ofreció una vida difícil, llena de desafíos, trabajo duro y peligros, pero que al final tendría honor y ayudaría a la humanidad.",
+                        "Hércules eligió el camino difícil de Areté. Eligió la virtud sobre la comodidad."
+                    ],
+                    lesson: "El camino fácil rara vez te lleva a un lugar al que valga la pena ir. Elige el desafío."
+                },
+                {
+                    id: "socrates",
+                    title: "Sócrates y la Cicuta",
+                    colorScheme: "purple",
+                    paragraphs: [
+                        "Sócrates (el maestro del maestro de Zenón) fue acusado injustamente de 'corromper a la juventud' solo por hacer preguntas. Fue sentenciado a muerte.",
+                        "Sus amigos planearon su escape de la prisión, pero Sócrates se negó. Dijo que había vivido toda su vida obedeciendo las leyes de Atenas, y no iba a romperlas solo para salvarse.",
+                        "Bebió el veneno (la cicuta) con calma, discutiendo sobre filosofía con sus amigos hasta su último aliento."
+                    ],
+                    lesson: "Ser valiente no es solo pelear. Es vivir (y morir) de acuerdo con tus principios."
+                },
+                {
+                    id: "bambu",
+                    title: "La Paciencia del Bambú Japonés",
+                    colorScheme: "green",
+                    paragraphs: [
+                        "Cuando siembras una semilla de bambú japonés, ¡no ves nada durante siete años! Solo riegas y esperas, mientras parece que nada ocurre.",
+                        "Pero durante esos siete años, el bambú está creando un sistema de raíces increíblemente fuerte bajo tierra.",
+                        "Y entonces, en solo seis semanas, ¡el bambú crece más de 30 metros! Su fuerza invisible se vuelve visible."
+                    ],
+                    lesson: "El esfuerzo que pones hoy (como estudiar o entrenar) construye las 'raíces' para tu éxito de mañana."
+                },
+                {
+                    id: "diogenes",
+                    title: "Diógenes y Alejandro Magno",
+                    colorScheme: "yellow",
+                    paragraphs: [
+                        "Diógenes era un filósofo que creía en la simplicidad. Vivía en un barril y no tenía casi nada.",
+                        "Un día, Alejandro Magno, el rey más poderoso de la tierra, fue a visitarlo. 'Soy Alejandro, el gran rey. Pídeme lo que quieras', le dijo.",
+                        "Diógenes, que estaba tomando el sol, simplemente respondió: 'Sí, que te apartes. Me estás tapando el sol'. Alejandro quedó tan impresionado que dijo: 'Si no fuera Alejandro, me gustaría ser Diógenes'."
+                    ],
+                    lesson: "La verdadera riqueza no es tener mucho, sino necesitar poco."
+                },
+                {
+                    id: "granjero_roca",
+                    title: "El Granjero y la Roca",
+                    colorScheme: "stone",
+                    paragraphs: [
+                        "Un granjero tenía una enorme roca en medio de su campo. Odiaba esa roca. Cada año, rompía sus arados y le hacía perder tiempo.",
+                        "Un día, harto, tomó una barra de hierro y decidió moverla. Le costó horas, sudor y esfuerzo, pero finalmente logró sacarla.",
+                        "Debajo de la roca, encontró un cofre lleno de oro. El obstáculo que tanto odiaba era, en realidad, su tesoro."
+                    ],
+                    lesson: "El obstáculo es el camino. Lo que te parece más difícil es, a menudo, lo que te hará más fuerte (o te dará un tesoro)."
+                },
+                {
+                    id: "musonio",
+                    title: "Musonio Rufo y el Exilio",
+                    colorScheme: "blue",
+                    paragraphs: [
+                        "Musonio Rufo fue un maestro estoico exiliado (expulsado de su hogar) a una isla desierta y árida.",
+                        "En lugar de quejarse de su mala suerte, vio el exilio como una oportunidad. Empezó a cultivar la tierra él mismo y enseñó filosofía a los pocos que lo visitaban.",
+                        "Demostró que no importa *dónde* estés, sino *quién* eres. Puedes practicar la virtud en un palacio o en una isla desierta."
+                    ],
+                    lesson: "No puedes controlar dónde te pone la vida, pero sí puedes controlar qué haces en ese lugar."
+                },
+                {
+                    id: "aguila",
+                    title: "El Águila que Renace",
+                    colorScheme: "orange",
+                    paragraphs: [
+                        "Se cuenta que cuando un águila envejece, su pico se curva, sus garras se vuelven débiles y sus plumas, pesadas.",
+                        "Para sobrevivir, vuela a lo alto de una montaña y comienza un proceso doloroso: golpea su pico contra una roca hasta romperlo. Cuando le crece uno nuevo, arranca sus viejas garras. Con las nuevas, arranca sus plumas viejas.",
+                        "Después de este duro proceso, el águila renace y puede vivir muchos años más. Acepta el dolor para poder transformarse."
+                    ],
+                    lesson: "Para ser más fuerte, a veces hay que soltar las 'plumas viejas': malos hábitos o pensamientos que ya no te sirven."
+                },
+                {
+                    id: "escultor",
+                    title: "El Escultor Estoico",
+                    colorScheme: "gray",
+                    paragraphs: [
+                        "Un estudiante le preguntó a un maestro escultor: '¿Cómo puedes crear una estatua tan bella de un león a partir de un bloque de mármol tan feo?'",
+                        "El escultor respondió: 'Yo no creo al león. El león ya está dentro de la piedra. Mi único trabajo es quitar las partes de la piedra que *no* son el león'.",
+                        "Los estoicos veían nuestra mente igual: tu 'yo' valiente y sabio ya está dentro. Tu trabajo es quitar el miedo, la pereza y el enojo que *no* son tú."
+                    ],
+                    lesson: "Tu 'yo' ideal ya está dentro de ti. Tu trabajo es quitar lo que sobra."
+                },
+                {
+                    id: "horacio",
+                    title: "Horacio en el Puente",
+                    colorScheme: "red",
+                    paragraphs: [
+                        "Un ejército enemigo avanzaba sobre Roma. La única forma de salvar la ciudad era destruir el único puente que cruzaba el río.",
+                        "Mientras los soldados romanos destruían el puente, un héroe llamado Horacio, junto con dos amigos, se pararon en el otro extremo y detuvieron a todo el ejército enemigo.",
+                        "Sabía que iba a morir, pero eligió sacrificarse para darle a su ciudad el tiempo que necesitaba para salvarse. Puso el bien de todos por encima de su propia vida."
+                    ],
+                    lesson: "El verdadero coraje (y la justicia) es hacer lo correcto por los demás, incluso si tienes miedo."
+                },
+                {
+                    id: "crisipo",
+                    title: "Crisipo, el Corredor",
+                    colorScheme: "cyan",
+                    paragraphs: [
+                        "Crisipo fue un filósofo estoico que era un corredor de larga distancia. Él usaba las carreras como metáfora.",
+                        "Decía: 'En una carrera, no controlas si el otro corredor es más rápido. No controlas si tropiezas con una piedra'.",
+                        "'Solo controlas estirar tus piernas, mantener tu ritmo y dar tu máximo esfuerzo hasta la meta'. La vida es igual: no compitas contra otros, compite por ser tu mejor versión."
+                    ],
+                    lesson: "No te preocupes por ganar a los demás. Preocúpate por dar tu 100% de esfuerzo."
+                },
+
+                // --- Historias de Elías ---
+                {
+                    id: "elias_futbol",
+                    title: "Elías y el Penal Fallado",
+                    colorScheme: "green",
+                    paragraphs: [
+                        "Final del partido. Empatados. Elías se prepara para tirar el penal decisivo. ¡Lo falla! El otro equipo gana.",
+                        "Camino a casa, su hermana Elisa le dice: '¡Qué mal tiraste!'. Elías siente cómo le hierve la sangre. Está furioso.",
+                        "Pero entonces, recuerda: 'No controlo el resultado. No controlo lo que dice Elisa'. Respira hondo y, en lugar de gritar, dice: 'Sí, fue un mal tiro. Practicaré más para la próxima'."
+                    ],
+                    lesson: "No controlas las burlas ni el resultado, pero sí controlas tu esfuerzo y tu calma."
+                },
+                {
+                    id: "elias_minecraft",
+                    title: "Elías y el Creeper Traicionero",
+                    colorScheme: "emerald",
+                    paragraphs: [
+                        "Elías pasó tres horas construyendo una base increíble en Minecraft. Tenía todo: cultivos, cofres, ¡hasta una torre de vigilancia!",
+                        "De repente... 'Tsssss... ¡BOOM!'. Un creeper apareció de la nada y destruyó la mitad de su creación. Elías estaba listo para apagar el juego y no volver a jugar.",
+                        "Su abuelo Paco lo vio y le dijo: 'El creeper es como un mal día. No lo controlas. Pero sí controlas si te rindes, o si lo construyes de nuevo, esta vez aún mejor'."
+                    ],
+                    lesson: "La verdadera construcción no es la de bloques, sino la de tu paciencia al volver a empezar."
+                },
+                {
+                    id: "elias_natacion",
+                    title: "Elías y el Agua Fría",
+                    colorScheme: "sky",
+                    paragraphs: [
+                        "Era martes, día de natación. Hacía frío y Elías estaba cansado. 'Mamá, no quiero ir', le dijo a Jari.",
+                        "Su mamá Jari se sentó a su lado y le dijo: 'Yo no puedo nadar por ti, Elías. Solo puedo llevarte. La decisión de esforzarte en la alberca, aunque el agua esté fría, es 100% tuya'.",
+                        "Elías fue. Se metió al agua fría y, aunque le costó, dio su mejor esfuerzo. Salió de la alberca sintiéndose orgulloso."
+                    ],
+                    lesson: "No controlas cómo te sientes (cansado o con flojera), pero sí controlas lo que *haces*."
+                },
+                {
+                    id: "elias_switch",
+                    title: "Elías, Elisa y el Jefe de Sonic",
+                    colorScheme: "blue",
+                    paragraphs: [
+                        "Elías estaba en la batalla final contra el jefe en su Nintendo Switch. ¡Estaba a punto de ganar!",
+                        "Justo en ese momento, su hermana Elisa entró. '¡Es mi turno! ¡Me prometiste!'. Elías quería gritarle que se fuera.",
+                        "Recordó la 'Justicia'. Respiró, pausó el juego (¡justo a tiempo!) y le dijo: 'Tienes razón. Termino este jefe y es tu turno, ¿de acuerdo? Seamos justos'. Elisa sonrió y asintió."
+                    ],
+                    lesson: "Ser justo (Justicia) significa respetar a los demás, incluso cuando interrumpe tu diversión."
+                },
+                {
+                    id: "elias_karate",
+                    title: "Elías y la Disciplina de la Abuela Estela",
+                    colorScheme: "purple",
+                    paragraphs: [
+                        "Era jueves por la tarde. Elías tenía un montón de tarea de matemáticas, pero su mundo de Minecraft lo llamaba.",
+                        "Su abuela Estela lo vio mirando el control del Switch. '¿Qué es más importante ahora mismo?', le preguntó con calma.",
+                        "'¿Recuerdas tus clases de karate? La disciplina (Templanza) no era solo para dar golpes. Es el poder para hacer lo que *debes* hacer, antes de hacer lo que *quieres* hacer'. Elías suspiró, guardó el control y sacó su cuaderno."
+                    ],
+                    lesson: "La Templanza (autocontrol) es tu superpoder para vencer al enemigo más difícil: la flojera."
+                }
+            ];
+
+            // B. Obtener elementos del DOM (Visor de Historias)
+            const storySelector = document.getElementById('story-selector');
+            const storyContentWrapper = document.getElementById('story-content-wrapper');
+
+            // C. Función para poblar el selector de historias
+            function populateStorySelector() {
+                if (!storySelector) return; // Salir si no existe
+                storySelector.innerHTML = ''; // Limpiar opciones anteriores
+                allStories.forEach(story => {
+                    const option = document.createElement('option');
+                    option.value = story.id;
+                    option.textContent = story.title;
+                    storySelector.appendChild(option);
+                });
+            }
+
+            // D. Función para mostrar una historia específica
+            function displayStory(storyId) {
+                if (!storyContentWrapper) return; // Salir si no existe
+                const story = allStories.find(s => s.id === storyId);
+                if (!story) return;
+
+                // 1. Construir HTML del contenido (La imagen ya es estática)
+                let contentHTML = `
+                    <h3 class="text-2xl font-bold text-${story.colorScheme}-700 mb-4">${story.title}</h3>
+                `;
+                
+                story.paragraphs.forEach(p => {
+                    contentHTML += `<p class="mb-4 text-lg leading-relaxed">${p}</p>`;
+                });
+
+                contentHTML += `
+                    <div class="mt-auto bg-${story.colorScheme}-100 border-l-4 border-${story.colorScheme}-500 p-4 rounded-r-lg">
+                        <strong class="text-${story.colorScheme}-800">Lección:</strong> "${story.lesson}"
+                    </div>
+                `;
+
+                // 3. Inyectar HTML
+                storyContentWrapper.innerHTML = contentHTML;
+            }
+
+            // E. Event Listener para el selector
+            if (storySelector) {
+                storySelector.addEventListener('change', (e) => {
+                    displayStory(e.target.value);
+                });
+            }
+
+            // F. Carga inicial
+            function initializeStoryViewer() {
+                populateStorySelector();
+                
+                // Elegir una historia al azar
+                const randomIndex = Math.floor(Math.random() * allStories.length);
+                const randomStory = allStories[randomIndex];
+
+                // Sincronizar el dropdown y mostrar la historia
+                if (storySelector) {
+                    storySelector.value = randomStory.id;
+                }
+                displayStory(randomStory.id);
+            }
+
+            // --- LÓGICA PARA EL FOOTER ALEATORIO ---
+            function setRandomFooterQuote() {
+                const intros = [
+                    "¡Sigue así, Elías!",
+                    "¡Un pensamiento de héroe para ti, Elías!",
+                    "¡Fuerza, Elías!",
+                    "¡Tú puedes, Elías!",
+                    "¡Palabras sabias para ti, Elías!"
+                ];
+                
+                const quotes = [
+                    "El obstáculo es el camino. ¡Cada desafío te hace más fuerte!",
+                    "Ser estoico significa ser como un roble: firme ante la tormenta, pero flexible para no romperse.",
+                    "La felicidad no está en lo que pasa, sino en cómo eliges ver lo que pasa.",
+                    "El verdadero superpoder es el autocontrol. ¡Domina tus reacciones!",
+                    "Concéntrate en tu esfuerzo, no en el resultado. ¡Ahí está tu verdadero control!",
+                    "Hoy es una nueva oportunidad para practicar tu coraje y tu paciencia.",
+                    "No te preocupes por lo que no puedes cambiar. Invierte tu energía en lo que sí puedes hacer.",
+                    "La calma es tu escudo. Úsala cuando sientas enojo o miedo.",
+                    "Cada vez que eliges ser amable o justo, ganas una batalla interior.",
+                    "Tu mente es tu fortaleza. ¡Tú decides quién entra y quién no!"
+                ];
+
+                const randomIntro = intros[Math.floor(Math.random() * intros.length)];
+                const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                
+                const footerQuoteElement = document.getElementById('footer-quote');
+                if (footerQuoteElement) {
+                    footerQuoteElement.innerHTML = `<strong class="block mb-2">${randomIntro}</strong> "${randomQuote}"`;
+                }
+            }
+
+            // --- ARRANQUE INICIAL ---
+            // Juego
+            populateWorriesList(); // Crea los primeros 7
+            setupDraggables();     // Les asigna los listeners
+            
+            // Desafío de Virtudes
+            shuffleArray(allChallenges); // Mezcla los desafíos
+            loadChallenge(0);            // Carga el primer desafío
+
+            // Visor de Historias
+            initializeStoryViewer(); // Carga las historias y muestra una al azar
+            
+            // Footer
+            setRandomFooterQuote(); // Establece la frase aleatoria del footer
+        });
+    </script>
+
+</body>
+</html>
+
