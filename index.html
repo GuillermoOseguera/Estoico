@@ -1066,30 +1066,272 @@
             // --- LÓGICA PARA EL VISOR DE HISTORIAS ---
 
             // A. Base de datos de todas las historias
-            const allStories = [/* ... (las 20 historias como antes) ... */
-                // Historias Clásicas
-                { id: "epicteto", title: "Epicteto, el Esclavo Sabio", colorScheme: "cyan", paragraphs: ["..."], lesson: "..." },
-                { id: "marco_aurelio", title: "El Emperador que Escribía su Diario", colorScheme: "amber", paragraphs: ["..."], lesson: "..." },
-                { id: "seneca", title: "Séneca y el Emperador Loco", colorScheme: "red", paragraphs: ["..."], lesson: "..." },
-                { id: "zenon", title: "Zenón y el Naufragio", colorScheme: "blue", paragraphs: ["..."], lesson: "..." },
-                { id: "cato", title: "Cato, el Incorruptible", colorScheme: "gray", paragraphs: ["..."], lesson: "..." },
-                { id: "eleccion_hercules", title: "La Elección de Hércules", colorScheme: "green", paragraphs: ["..."], lesson: "..." },
-                { id: "socrates", title: "Sócrates y la Cicuta", colorScheme: "purple", paragraphs: ["..."], lesson: "..." },
-                { id: "bambu", title: "La Paciencia del Bambú Japonés", colorScheme: "green", paragraphs: ["..."], lesson: "..." },
-                { id: "diogenes", title: "Diógenes y Alejandro Magno", colorScheme: "yellow", paragraphs: ["..."], lesson: "..." },
-                { id: "granjero_roca", title: "El Granjero y la Roca", colorScheme: "stone", paragraphs: ["..."], lesson: "..." },
-                { id: "musonio", title: "Musonio Rufo y el Exilio", colorScheme: "blue", paragraphs: ["..."], lesson: "..." },
-                { id: "aguila", title: "El Águila que Renace", colorScheme: "orange", paragraphs: ["..."], lesson: "..." },
-                { id: "escultor", title: "El Escultor Estoico", colorScheme: "gray", paragraphs: ["..."], lesson: "..." },
-                { id: "horacio", title: "Horacio en el Puente", colorScheme: "red", paragraphs: ["..."], lesson: "..." },
-                { id: "crisipo", title: "Crisipo, el Corredor", colorScheme: "cyan", paragraphs: ["..."], lesson: "..." },
-                // Historias de Elías
-                { id: "elias_futbol", title: "Elías y el Penal Fallado", colorScheme: "green", paragraphs: ["..."], lesson: "..." },
-                { id: "elias_minecraft", title: "Elías y el Creeper Traicionero", colorScheme: "emerald", paragraphs: ["..."], lesson: "..." },
-                { id: "elias_natacion", title: "Elías y el Agua Fría", colorScheme: "sky", paragraphs: ["..."], lesson: "..." },
-                { id: "elias_switch", title: "Elías, Elisa y el Jefe de Sonic", colorScheme: "blue", paragraphs: ["..."], lesson: "..." },
-                { id: "elias_karate", title: "Elías y la Disciplina de la Abuela Estela", colorScheme: "purple", paragraphs: ["..."], lesson: "..." }
-            ];
+            const allStories = [const allStories = [
+                // ========== HISTORIAS CLÁSICAS DE ESTOICOS ==========
+                {
+                    id: "epicteto",
+                    title: "Epicteto, el Esclavo Sabio",
+                    colorScheme: "cyan",
+                    paragraphs: [
+                        "Epicteto nació como esclavo en Roma hace casi 2,000 años. Su amo era cruel y un día le rompió la pierna a propósito. Epicteto quedó cojo para siempre.",
+                        "Pero Epicteto no se llenó de odio. En su lugar, decidió estudiar filosofía. Aprendió que aunque no podía controlar su cuerpo, SÍ podía controlar su mente y sus pensamientos.",
+                        "Cuando finalmente fue liberado, se convirtió en uno de los maestros más respetados de Roma. Enseñaba: 'Hay cosas que dependen de nosotros, y cosas que no. Preocúpate solo por las primeras.'",
+                        "Emperadores y nobles viajaban para escuchar sus lecciones. El hombre que fue esclavo se volvió más libre que muchos reyes, porque había aprendido a dominar su mente."
+                    ],
+                    lesson: "Tu libertad real no depende de tus circunstancias externas, sino de tu mente. Nadie puede esclavizar tus pensamientos si tú no lo permites."
+                },
+                {
+                    id: "marco_aurelio",
+                    title: "El Emperador que Escribía su Diario",
+                    colorScheme: "amber",
+                    paragraphs: [
+                        "Marco Aurelio era el hombre más poderoso del mundo: emperador de Roma. Podía tenerlo todo. Pero todas las noches, en lugar de festejar, escribía en su diario personal.",
+                        "En ese diario no presumía sus victorias. Al contrario, se escribía recordatorios como: 'Hoy perdí la paciencia con mi hijo. Mañana seré mejor.' O: 'El poder que tengo no me hace superior a nadie.'",
+                        "Enfrentó guerras, plagas y traiciones. Pero cada noche volvía a su diario para recordarse sus principios: ser justo, ser sabio, tener autocontrol.",
+                        "Sus notas privadas se convirtieron en el libro 'Meditaciones', uno de los textos más leídos de la historia. El emperador más poderoso nos enseñó que el verdadero poder es el autocontrol."
+                    ],
+                    lesson: "La grandeza no viene del poder externo, sino de trabajar en ti mismo cada día. Incluso el emperador del mundo necesitaba recordarse ser buena persona."
+                },
+                {
+                    id: "seneca",
+                    title: "Séneca y el Emperador Loco",
+                    colorScheme: "red",
+                    paragraphs: [
+                        "Séneca fue consejero del emperador Nerón, quien empezó como un buen gobernante pero se volvió cada vez más cruel y loco.",
+                        "Séneca intentó guiarlo hacia la sabiduría, pero Nerón prefirió el poder sin límites. Finalmente, Nerón ordenó que Séneca se suicidara (así ejecutaban en Roma).",
+                        "Cuando llegaron los soldados, Séneca estaba cenando tranquilo con su esposa. Les dijo: 'Ya sabía que este día llegaría. He vivido bien, y por eso puedo morir en paz.'",
+                        "Murió con calma, sin miedo ni odio, aplicando hasta el final lo que había enseñado: la muerte es inevitable, pero tu actitud ante ella es tu elección."
+                    ],
+                    lesson: "Incluso cuando no puedes controlar lo que te sucede (ni siquiera tu propia muerte), SIEMPRE puedes controlar tu actitud y tu dignidad."
+                },
+                {
+                    id: "zenon",
+                    title: "Zenón y el Naufragio",
+                    colorScheme: "blue",
+                    paragraphs: [
+                        "Zenón era un rico comerciante griego que viajaba en barco con toda su fortuna: oro, joyas, telas preciosas. De repente, una tormenta hundió el barco.",
+                        "Zenón llegó nadando a la playa, sin nada. Lo había perdido todo. Estaba arruinado.",
+                        "Mientras caminaba mojado por las calles de Atenas, entró a una librería para secarse. Allí encontró un libro de filosofía que cambió su vida.",
+                        "Años después, Zenón fundó el Estoicismo. Solía decir: 'Tuve un naufragio afortunado, porque me obligó a encontrar un tesoro más valioso que el oro: la sabiduría.'"
+                    ],
+                    lesson: "A veces, perderlo todo es el empujón que necesitas para encontrar lo realmente importante. Los obstáculos pueden ser oportunidades disfrazadas."
+                },
+                {
+                    id: "cato",
+                    title: "Cato, el Incorruptible",
+                    colorScheme: "gray",
+                    paragraphs: [
+                        "Cato era un senador romano famoso por algo muy extraño: nunca aceptaba sobornos. En aquella época, todos los políticos robaban, pero Cato no.",
+                        "Poderosos hombres le ofrecían oro y tierras para que votara a su favor. Cato los rechazaba. Le amenazaban con arruinarlo. Cato se mantenía firme.",
+                        "Sus enemigos se burlaban: '¡Qué tonto! Podría ser rico.' Pero la gente común lo amaba y respetaba. Sabían que Cato siempre haría lo correcto.",
+                        "Cuando Roma cayó en dictadura, Cato prefirió morir antes que vivir sin libertad y sin sus principios. Su nombre se volvió sinónimo de integridad."
+                    ],
+                    lesson: "Tus principios son tu verdadera riqueza. El dinero y el poder vienen y van, pero tu integridad, una vez perdida, es casi imposible de recuperar."
+                },
+                {
+                    id: "eleccion_hercules",
+                    title: "La Elección de Hércules",
+                    colorScheme: "green",
+                    paragraphs: [
+                        "Según la leyenda, el joven Hércules estaba sentado en una encrucijada, confundido sobre qué camino tomar en la vida.",
+                        "Aparecieron dos mujeres. La primera, hermosa y lujosa, le dijo: 'Sígueme y tendrás placer, comodidad y diversión sin fin.' La segunda, sencilla y fuerte, le dijo: 'Sígueme y tendrás desafíos, trabajo duro, pero también honor y verdadera felicidad.'",
+                        "Hércules eligió a la segunda: el camino de la virtud. No fue fácil: enfrentó monstruos, trabajos imposibles y sufrimiento. Pero se convirtió en el héroe más grande de Grecia.",
+                        "Los estoicos usaban esta historia para enseñar: el camino fácil te da placer momentáneo; el camino difícil te da significado permanente."
+                    ],
+                    lesson: "Todos los días eliges: ¿lo fácil o lo correcto? El camino del esfuerzo y la disciplina es más duro, pero construye un héroe."
+                },
+                {
+                    id: "socrates",
+                    title: "Sócrates y la Cicuta",
+                    colorScheme: "purple",
+                    paragraphs: [
+                        "Sócrates, el filósofo más sabio de Atenas, fue acusado injustamente de 'corromper a los jóvenes' por hacer preguntas incómodas al gobierno.",
+                        "Lo condenaron a muerte. Debía beber cicuta, un veneno mortal. Sus amigos le rogaron: '¡Escapa! Podemos sobornarlo a los guardias.' Sócrates se negó.",
+                        "Dijo: 'He vivido respetando las leyes de mi ciudad. No voy a romperlas ahora por miedo. Además, la muerte es solo el fin del cuerpo, no del alma ni de mis ideas.'",
+                        "Bebió el veneno rodeado de sus estudiantes, enseñando con calma hasta el último momento. Su muerte mostró más coraje que mil batallas."
+                    ],
+                    lesson: "Vivir según tus principios significa mantenerlos incluso cuando es difícil o te cueste todo. La verdadera valentía es moral, no física."
+                },
+                {
+                    id: "bambu",
+                    title: "La Paciencia del Bambú Japonés",
+                    colorScheme: "green",
+                    paragraphs: [
+                        "Un granjero plantó semillas de bambú japonés. Las regó y cuidó todos los días. Pasó un año: nada. Dos años: nada. Tres, cuatro años: ¡nada!",
+                        "Sus vecinos se burlaban: '¡Abandona! Esas semillas están muertas.' Pero el granjero siguió regando con paciencia.",
+                        "En el quinto año, el bambú finalmente brotó. Y en solo seis semanas creció... ¡30 metros de altura! ¿Qué había pasado?",
+                        "Durante esos cinco años, el bambú estaba desarrollando raíces profundas bajo tierra. Por eso, cuando finalmente creció, lo hizo de forma imparable."
+                    ],
+                    lesson: "El progreso real a veces es invisible. Tu esfuerzo no se desperdicia, aunque no veas resultados inmediatos. Las raíces fuertes crecen en silencio."
+                },
+                {
+                    id: "diogenes",
+                    title: "Diógenes y Alejandro Magno",
+                    colorScheme: "yellow",
+                    paragraphs: [
+                        "Diógenes era un filósofo tan estoico que vivía en un barril en la calle. No poseía nada, pero era completamente feliz.",
+                        "Un día, Alejandro Magno, el conquistador más poderoso del mundo, vino a visitarlo. Encontró a Diógenes tomando el sol.",
+                        "Alejandro le dijo: 'Soy el rey. Pídeme lo que quieras y te lo daré.' Diógenes respondió: 'Apártate, me estás tapando el sol.'",
+                        "Alejandro, sorprendido, dijo a sus generales: 'Si yo no fuera Alejandro, me gustaría ser Diógenes.' Había entendido la lección: Diógenes era más libre que él."
+                    ],
+                    lesson: "La libertad no viene de poseer mucho, sino de necesitar poco. El que no desea nada no puede ser controlado por nadie."
+                },
+                {
+                    id: "granjero_roca",
+                    title: "El Granjero y la Roca",
+                    colorScheme: "stone",
+                    paragraphs: [
+                        "Un granjero tenía un campo perfecto, excepto por una enorme roca en el centro. Durante años la evitaba, arando alrededor de ella.",
+                        "Un día se hartó: '¡Esta roca arruina mi campo! ¡La voy a sacar!' Trajo herramientas, decidido a destruirla.",
+                        "Cuando empezó a cavar alrededor, descubrió algo sorprendente: la 'enorme' roca solo tenía unos centímetros de profundidad. ¡Era casi plana! La quitó en minutos.",
+                        "Se rió de sí mismo: 'Pasé años preocupándome por este obstáculo sin siquiera intentar resolverlo. En mi mente, la roca era gigante. En realidad, era diminuta.'"
+                    ],
+                    lesson: "La mayoría de tus miedos y obstáculos son mucho más pequeños de lo que parecen. Deja de evitarlos y enfréntales directamente."
+                },
+                {
+                    id: "musonio",
+                    title: "Musonio Rufo y el Exilio",
+                    colorScheme: "blue",
+                    paragraphs: [
+                        "Musonio Rufo era un filósofo estoico que enseñaba en Roma. El emperador lo consideró peligroso (porque enseñaba a pensar) y lo exilió a una isla desierta.",
+                        "Sus estudiantes lloraron: '¡Maestro, esto es terrible! ¡Te han quitado todo!' Musonio sonrió: 'Me quitaron mi casa, no mi carácter. Me quitaron mi ciudad, no mi sabiduría.'",
+                        "En la isla rocosa, sin lujos, Musonio siguió enseñando a los pescadores locales. Decía: 'Un estoico puede ser feliz en un palacio o en una cueva. La ubicación no importa.'",
+                        "Cuando finalmente le permitieron volver, sus estudiantes se sorprendieron: Musonio no había cambiado. Seguía siendo el mismo hombre tranquilo y sabio."
+                    ],
+                    lesson: "Las circunstancias externas no determinan tu felicidad interior. Tú no eres tu casa, tu ciudad o tus posesiones. Eres tu mente."
+                },
+                {
+                    id: "aguila",
+                    title: "El Águila que Renace",
+                    colorScheme: "orange",
+                    paragraphs: [
+                        "Cuenta una leyenda que cuando un águila llega a los 40 años, sus garras se curvan tanto que no puede cazar, su pico se tuerce y sus plumas se vuelven pesadas.",
+                        "Tiene dos opciones: esperar la muerte o pasar por un doloroso proceso de renovación. El águila sabia elige renovarse.",
+                        "Vuela a lo alto de una montaña, donde golpea su pico contra la roca hasta romperlo. Cuando le crece uno nuevo, arranca sus garras viejas. Finalmente, se quita las plumas pesadas una por una.",
+                        "Después de 5 meses de dolor, el águila sale transformada y vive 30 años más. Se renueva porque eligió el dolor temporal sobre el sufrimiento permanente."
+                    ],
+                    lesson: "A veces, para crecer necesitas destruir partes viejas de ti mismo. El cambio duele, pero quedarte estancado duele más."
+                },
+                {
+                    id: "escultor",
+                    title: "El Escultor Estoico",
+                    colorScheme: "gray",
+                    paragraphs: [
+                        "Un aprendiz le preguntó a un escultor: '¿Cómo hiciste esa estatua tan perfecta de un caballo?' El escultor respondió: 'Fácil. Tomé un bloque de mármol y quité todo lo que no era caballo.'",
+                        "El aprendiz se confundió. El escultor explicó: 'Dentro de cada bloque de piedra ya existe una forma perfecta. Mi trabajo no es crear, sino eliminar lo que sobra.'",
+                        "Los estoicos aplicaban esta idea a la vida: dentro de ti ya existe tu mejor versión. Solo debes quitar lo que sobra: el egoísmo, la pereza, el miedo, las excusas.",
+                        "Tu vida es tu obra de arte. Cada día, quita un poco más de lo que no eres tú realmente, hasta revelar tu forma verdadera."
+                    ],
+                    lesson: "No necesitas añadir cosas para mejorar. Necesitas quitar los vicios, miedos y malos hábitos que esconden tu mejor versión."
+                },
+                {
+                    id: "horacio",
+                    title: "Horacio en el Puente",
+                    colorScheme: "red",
+                    paragraphs: [
+                        "Horacio era un soldado romano que defendía un puente cuando un ejército enemigo gigante se acercó. Sus compañeros huyeron aterrorizados.",
+                        "Horacio se quedó solo en el puente, bloqueando el paso. Detrás de él, sus compañeros cortaban el puente para evitar la invasión.",
+                        "Durante minutos eternos, Horacio luchó contra decenas de enemigos él solo. Las flechas volaban, las espadas chocaban. Él no retrocedió.",
+                        "Justo cuando el puente cayó, Horacio saltó al río con su armadura y nadó hasta la orilla. Salvó Roma aquel día con su coraje."
+                    ],
+                    lesson: "El verdadero coraje no es no tener miedo. Es hacer lo correcto a pesar del miedo, especialmente cuando estás solo."
+                },
+                {
+                    id: "crisipo",
+                    title: "Crisipo, el Corredor de Ideas",
+                    colorScheme: "cyan",
+                    paragraphs: [
+                        "Crisipo era un filósofo estoico que escribió más de 700 libros. La gente le preguntaba: '¿Cómo puedes escribir tanto?'",
+                        "Él respondía: 'Escribo cada día, aunque solo sea una página. Una página al día son 365 páginas al año. En diez años, 3,650 páginas.'",
+                        "Crisipo aplicaba la filosofía estoica a su trabajo: no se enfocaba en 'escribir 700 libros' (meta abrumadora), sino en 'escribir hoy' (meta controlable).",
+                        "Así logró más que casi cualquier pensador de su época. No por ser genio, sino por ser constante."
+                    ],
+                    lesson: "No te abrumes con metas gigantes. Enfócate en lo que puedes hacer HOY. Los pequeños pasos constantes crean resultados extraordinarios."
+                },
+
+                // ========== HISTORIAS DE ELÍAS (Situaciones Cotidianas) ==========
+                {
+                    id: "elias_futbol",
+                    title: "Elías y el Penal Fallado",
+                    colorScheme: "green",
+                    paragraphs: [
+                        "Era la final del torneo de fútbol de Elías. El marcador estaba empatado y le tocó tirar el último penal. Si anotaba, su equipo ganaba el campeonato.",
+                        "Elías respiró hondo, corrió... y el portero atrapó el balón. Su equipo perdió. Todos sus compañeros estaban devastados. Algunos lloraban.",
+                        "El entrenador se acercó a Elías y le dijo algo que nunca olvidaría: 'No fallaste porque no tuvieras el talento. Fallaste porque el portero hizo su trabajo. No controlas sus habilidades, solo controlas tu esfuerzo. ¿Hiciste tu mejor esfuerzo?'",
+                        "Elías respondió sinceramente: 'Sí.' El entrenador sonrió: 'Entonces no fallaste como jugador. Solo perdiste un juego. Hay una diferencia enorme.'"
+                    ],
+                    lesson: "El resultado no siempre está bajo tu control. Lo que SÍ controlas es tu preparación, tu esfuerzo y tu actitud. Eso es lo que te define."
+                },
+                {
+                    id: "elias_minecraft",
+                    title: "Elías y el Creeper Traicionero",
+                    colorScheme: "emerald",
+                    paragraphs: [
+                        "Elías había pasado tres semanas construyendo un castillo épico en Minecraft. Tenía torres, un foso, una granja automática. Era su obra maestra.",
+                        "Una tarde, no vio a un creeper acercándose. ¡BOOM! La explosión destruyó la mitad de su castillo. Elías sintió ganas de lanzar el control por la ventana.",
+                        "Su abuelo Paco, que pasaba por ahí, le preguntó: '¿Qué pasó?' Elías, furioso, le explicó. Paco respondió: '¿Perdiste algo real? ¿Se incendió tu casa? ¿Se lastimó alguien?'",
+                        "Elías se quedó en silencio. 'No...', admitió. Paco sonrió: 'Entonces solo perdiste pixeles, mijo. Pero si lanzas ese control, perderás algo real: tu autocontrol. ¿Qué es más valioso?'"
+                    ],
+                    lesson: "Cuando algo te enoja, pregúntate: '¿Esto importará en un año? ¿En un mes? ¿En una semana?' Si no, no merece perder tu paz."
+                },
+                {
+                    id: "elias_natacion",
+                    title: "Elías y el Agua Fría",
+                    colorScheme: "sky",
+                    paragraphs: [
+                        "Era invierno y Elías tenía su clase de natación. Esa mañana hacía mucho frío y no tenía ninguna gana de meterse a la alberca.",
+                        "Se quedó en la orilla, temblando, buscando excusas para no entrar. Su entrenadora le gritó: '¡Elías! ¿Vas a entrar o vas a seguir sufriendo ahí parado?'",
+                        "Tenía razón. Mientras más pensaba en el agua fría, peor se sentía. Finalmente, tomó aire y se aventó de clavado.",
+                        "Los primeros segundos fueron helados. Pero después de nadar un minuto, su cuerpo se adaptó. Al final de la clase, ya no sentía frío. Se dio cuenta: había sufrido más por anticipación que por la realidad."
+                    ],
+                    lesson: "Muchas veces sufrimos más imaginando algo difícil que haciéndolo realmente. La anticipación del dolor suele ser peor que el dolor mismo."
+                },
+                {
+                    id: "elias_switch",
+                    title: "Elías, Elisa y el Jefe de Sonic",
+                    colorScheme: "blue",
+                    paragraphs: [
+                        "Elías llevaba una hora intentando vencer a un jefe en Sonic. Estaba a PUNTO de ganarle cuando su hermana Elisa irrumpió gritando: '¡Elías! ¡Mamá dice que me dejes jugar AHORA!'",
+                        "Elías explotó: '¡Estoy ocupado! ¡Espérate!' Elisa empezó a llorar y llamó a su mamá Jari. Jari llegó molesta: 'Elías, comparte el Switch. Ya llevas mucho tiempo.'",
+                        "Furioso, Elías le pasó el control a Elisa con un aventón. Elisa, vengativa, borró su partida guardada. Ahora Elías tendría que empezar desde cero.",
+                        "Esa noche, su abuela Estela le dijo: 'Cuando reaccionas con enojo, le das poder a los demás sobre tu paz. Si hubieras pausado con calma y negociado, seguirías teniendo tu partida.'"
+                    ],
+                    lesson: "Tu reacción emocional tiene consecuencias. El autocontrol no es solo 'portarte bien', es proteger lo que te importa."
+                },
+                {
+                    id: "elias_karate",
+                    title: "Elías y la Disciplina de la Abuela Estela",
+                    colorScheme: "purple",
+                    paragraphs: [
+                        "Elías había dejado karate hace un año porque 'era aburrido'. Ahora quería volver, pero su abuela Estela le dijo: 'No hasta que me demuestres disciplina.'",
+                        "Estela le propuso un trato: 'Durante un mes, haz tu cama todas las mañanas y estudia 30 minutos diarios sin que nadie te lo recuerde. Si lo logras, te dejo regresar a karate.'",
+                        "Las primeras semanas fueron difíciles. Elías olvidaba, se distraía, ponía excusas. Pero poco a poco, se volvió más fácil.",
+                        "Al final del mes, Estela sonrió: 'No te estoy enseñando a hacer la cama, mijo. Te estoy enseñando que tú mandas sobre ti mismo. Esa es la base de cualquier arte marcial.'"
+                    ],
+                    lesson: "La disciplina en las cosas pequeñas construye la disciplina en las cosas grandes. Empieza donde estés, con lo que puedas."
+                },
+
+                // ========== MÁS HISTORIAS COTIDIANAS DE ELÍAS ==========
+                {
+                    id: "elias_examen",
+                    title: "Elías y el Examen Sorpresa",
+                    colorScheme: "red",
+                    paragraphs: [
+                        "El maestro anunció un examen sorpresa de historia. Elías sintió pánico: había pasado toda la semana jugando Minecraft en lugar de estudiar.",
+                        "Durante el examen, Elías no sabía muchas respuestas. Vio que su compañero David tenía el examen visible. Sería tan fácil copiar...",
+                        "Recordó algo que su abuelo Paco le había dicho: 'El carácter es lo que haces cuando nadie te ve.' Respiró hondo y dejó varias respuestas en blanco.",
+                        "Sacó 6. No era buena nota, pero cuando se acostó esa noche, durmió tranquilo. David sacó 10 copiando, pero Elías sabía algo que David no: él había preservado su integridad."
+                    ],
+                    lesson: "Tus acciones te definen más que tus resultados. Reprobar con honestidad construye más carácter que aprobar haciendo trampa."
+                },
+                {
+                    id: "elias_lluvia",
+                    title: "Elías y el Partido Bajo la Lluvia",
+                    colorScheme: "slate",
+                    paragraphs: [
+                        "El día del partido importante empezó a llover fuerte. La mitad del equipo quería cancelar. El campo se estaba convirtiendo en un lodazal.",
+                        "Elías también tenía frío y no quería jugar. Pero el entrenador les dijo: 'El otro equipo también está bajo la lluvia. La diferencia será quién se rinde mentalmente primero.'",
+                        "Elías decidió cambiar su actitud. En lugar];
 
             // B. Obtener elementos del DOM (Visor de Historias)
             const storySelector = document.getElementById('story-selector');
